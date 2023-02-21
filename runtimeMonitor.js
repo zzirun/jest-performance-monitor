@@ -1,28 +1,56 @@
-const TestClock = require("./testClock");
+const RuntimeStopwatch = require("./runtimeStopwatch");
 
 class RuntimeMonitor {
-    constructor(mock, model) {
-        this.testClock = new TestClock();
-        this.mock = mock;
-        this.model = model;
+    constructor() {
+        this.runtimeStopwatch = new RuntimeStopwatch();
+        this.timings = [];
+        this.totalTiming = 0;
+        this.currTiming = 0;
+
+        this.runs = 0;
     }
 
-    startMonitoring() {
-        this.testClock.start();
+    /* Called when mock associated with model is called once */
+    notify(model) {
+        this.currTiming += model();
     }
 
-    stopMonitoring() {
-        this.testClock.stop();
-        const mockCalls = this.mock.mock.calls.length; 
-        this.testClock.addTime(mockCalls * this.model());
+    handle(func) {
+        this.runs++;
+
+        this.runtimeStopwatch.start();
+        func();
+        this.runtimeStopwatch.stop();
+        this.currTiming += this.runtimeStopwatch.read();
+
+        this.timings.push(this.currTiming);
+        this.totalTiming += this.currTiming;
+
+        this.currTiming = 0;
+        this.runtimeStopwatch.reset();
     }
 
-    getRuntime() {
-        return this.testClock.read();
+    getTotalRuntime() {
+        return this.totalTiming;
     }
 
-    resetRuntime() {
-        this.testClock.reset();
+    getMeanRuntime() {
+        return this.totalTiming/this.runs;
+    }
+
+    getRuntimePercentile(percentile) {
+
+    }
+
+    resetMonitor() {
+        this.runtimeStopwatch.reset();
+        this.timings = [];
+        this.totalTiming = 0;
+        this.currTiming = 0;
+
+        this.runs = 0;
+
+        return this;
     }
 }
 
