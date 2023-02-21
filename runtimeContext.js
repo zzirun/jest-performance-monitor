@@ -7,7 +7,7 @@ class RuntimeContext {
 
     mockImplementationWithModel(mock, implementation, model) {
         const implementationWithNotif = () => {
-            this.monitor.notify(model);
+            this.monitor.notify(mock, model);
             return implementation();
         };
         mock.mockImplementation(implementationWithNotif);

@@ -11,8 +11,10 @@ class RuntimeMonitor {
     }
 
     /* Called when mock associated with model is called once */
-    notify(model) {
-        this.currTiming += model();
+    notify(mock, model) {
+        const run = mock.mock.calls.length;
+        const args = mock.mock.calls[run - 1];
+        this.currTiming += model(run, args);
     }
 
     handle(func) {
