@@ -29,7 +29,10 @@ class RuntimeContext {
     }
 
     //todo: implement expects
-    //todo: implement reset
+
+    clearContext() {
+        this.monitor.resetMonitor();
+    }
 
 }
 

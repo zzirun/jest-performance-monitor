@@ -1,9 +1,10 @@
-const getter = require("../index.js");
+const Registrar = require("../index.js");
 const mockAxios = require("axios");
 const RuntimeContext = require("../runtimeContext");
 
-/* Mocks */
+/* Mocks & Objects */
 jest.mock("axios");
+const registrar = new Registrar();
 
 /* Mock implementations */
 const getImplementation = () => 
@@ -32,26 +33,35 @@ runtimeCtx.mockImplementationWithModel(mockAxios.get, getImplementation, scaling
 runtimeCtx.mockWithModel(mockAxios.put, randPerfModel);
 
 /* Tests */
-describe("getter", () => {
-  afterEach(jest.clearAllMocks);
+describe("registrar", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+    runtimeCtx.clearContext();
+  });
 
-  test("should return the first entry from the api", async () => {
-    const result = await getter(1);
+  test("should get the first entry from the api", async () => {
+    const result = await registrar.getter(1);
 
     expect(result).toBe("Zhai Zirun");
     expect(mockAxios.get).toHaveBeenCalledTimes(1);
   });
 
-  test("should return within expected time on average", async () => {
+  test("should get name within expected time on average", async () => {
     const runs = 100;
     runtimeCtx.repeat(runs, 
-      async () => await getter(1));
+      async () => await registrar.getter(1));
     expect(mockAxios.get).toHaveBeenCalledTimes(runs);
     expect(runtimeCtx.getMeanRuntime()).toBeLessThan(MAX/3 + MIN);
   });
 
-  test("should get and put name within expected time on average", async() => {
-
+  test("should change id for name within expected time on average", async() => {
+    const runs = 100;
+    // await registrar.changeId(1, 2);
+    await runtimeCtx.repeat(runs, 
+      async () => await registrar.changeId(1, 2));
+    expect(mockAxios.get).toHaveBeenCalledTimes(runs);
+    expect(mockAxios.put).toHaveBeenCalledTimes(runs);
+    expect(runtimeCtx.getMeanRuntime()).toBeLessThan(4*MAX/3 + MIN);
   });
 
 });
