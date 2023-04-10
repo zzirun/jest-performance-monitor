@@ -1,5 +1,6 @@
 class RuntimeContext {
     constructor(asyncMode) {
+        this.monitoring = false;
         this.monitor = asyncMode.monitor();
         //todo: one monitor per run instead?
     }
@@ -8,7 +9,9 @@ class RuntimeContext {
 
     mockImplementationWithModel(mock, implementation, model) {
         const implementationWithNotif = async () => {
-            await this.monitor.notify(mock, model);
+            if (this.monitoring) {
+                await this.monitor.notify(mock, model);
+            }
             return implementation();
         };
         mock.mockImplementation(implementationWithNotif);
@@ -20,7 +23,8 @@ class RuntimeContext {
 
     // Run tests
 
-    async repeat(runs, func, asyncMode) {
+    async repeat(runs, func) {
+        this.monitoring = true;
         for (let i = 0; i < runs; i++) {
             await this.monitor.handle(func); 
         }

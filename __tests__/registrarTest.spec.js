@@ -1,7 +1,7 @@
 const Registrar = require("../index.js");
 const mockAxios = require("axios"); //use prototype of mockaxios to make another one ?? 
 const RuntimeContext = require("../runtimeContext");
-const AsyncMode = require("../asyncModes.js");
+const AsyncMode = require("../runtimeMonitors/asyncModes.js");
 
 /* Mocks & Objects */
 jest.mock("axios");
@@ -29,7 +29,7 @@ const scalingPerfModel = (run, args) => {
 }
 
 /* Assigning mock implementations and models to mocks */
-const runtimeCtx = new RuntimeContext(AsyncMode.Parallel);
+const runtimeCtx = new RuntimeContext(AsyncMode.Serial);
 runtimeCtx.mockImplementationWithModel(mockAxios.get, getImplementation, scalingPerfModel);
 runtimeCtx.mockWithModel(mockAxios.put, randPerfModel);
 

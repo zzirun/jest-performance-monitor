@@ -1,18 +1,8 @@
-const RuntimeStopwatch = require("./runtimeStopwatch");
-const percentile = require("percentile");
+const RuntimeMonitor = require("./runtimeMonitor");
 
-class ParallelRuntimeMonitor {
+class ParallelRuntimeMonitor extends RuntimeMonitor{
     constructor() {
-        // all runs
-        this.runs = 0;
-        this.runTimings = [];
-        this.totalTiming = 0;
-
-        // current run
-        this.runtimeStopwatch = new RuntimeStopwatch();
-        this.currTiming = 0;
-        this.mockStartTimes = [];
-        this.mockEndTimes = [];
+        super();
     }
 
     /* Called when mock associated with model is called once */
@@ -51,37 +41,6 @@ class ParallelRuntimeMonitor {
         this.totalTiming += this.currTiming;
 
         this.resetCurrRun();
-    }
-
-    getTotalRuntime() {
-        return this.totalTiming;
-    }
-
-    getMeanRuntime() {
-        console.log("runs: " + this.runs);
-        return this.totalTiming/this.runs;
-    }
-
-    getRuntimePercentile(p) {
-        return percentile(p, this.runTimings);
-    }
-
-    resetCurrRun() {
-        this.runtimeStopwatch.reset();
-        this.currTiming = 0;
-        this.mockStartTimes = [];
-        this.mockEndTimes = [];
-
-        return this;
-    }
-
-    resetMonitor() {
-        this.runTimings = [];
-        this.totalTiming = 0;
-        this.runs = 0;
-
-        this.resetCurrRun();
-        return this;
     }
 }
 

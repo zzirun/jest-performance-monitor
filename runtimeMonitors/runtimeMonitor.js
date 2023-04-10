@@ -1,7 +1,7 @@
-const RuntimeStopwatch = require("./runtimeStopwatch");
+const RuntimeStopwatch = require("../runtimeStopwatch");
 const percentile = require("percentile");
 
-class SerialRuntimeMonitor {
+class RuntimeMonitor {
     constructor() {
         // all runs
         this.runs = 0;
@@ -13,28 +13,6 @@ class SerialRuntimeMonitor {
         this.currTiming = 0;
         this.mockStartTimes = [];
         this.mockEndTimes = [];
-    }
-
-    /* Called when mock associated with model is called once */
-    async notify(mock, model) {
-        const run = mock.mock.calls.length;
-        const args = mock.mock.calls[run - 1];
-        this.currTiming += model(run, args);
-    }
-
-    async handle(func) {
-        this.runs++;
-
-        this.runtimeStopwatch.start();
-        await func();
-        this.currTiming += this.runtimeStopwatch.read();
-
-        console.log("Timing: " + this.currTiming);
-
-        this.runTimings.push(this.currTiming);
-        this.totalTiming += this.currTiming;
-
-        this.resetCurrRun();
     }
 
     getTotalRuntime() {
@@ -69,4 +47,4 @@ class SerialRuntimeMonitor {
     }
 }
 
-module.exports = SerialRuntimeMonitor;
+module.exports = RuntimeMonitor;
