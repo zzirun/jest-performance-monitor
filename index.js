@@ -14,6 +14,7 @@ class Registrar {
     let res = await axios.get(`https://swapi.dev/api/people/${oldId}/`);
     await axios.put(`https://swapi.dev/api/people/`, {id: newId, name: res.data.name});
   }
+  //todo: make async function with interleaving inside?
 
 }
   

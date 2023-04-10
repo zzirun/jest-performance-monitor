@@ -11,21 +11,24 @@ class RuntimeStopwatch {
         }
     }
 
-    stop() {
+    // stop() {
+    //     if (!this.started) {
+    //         throw new Error("Test Clock has not been started!");
+    //     } else {
+    //         this.time += Date.now() - this.timingStart;
+    //         this.started = false;
+    //     }
+    // }
+
+    read() {
         if (!this.started) {
             throw new Error("Test Clock has not been started!");
         } else {
-            this.time += Date.now() - this.timingStart;
-            this.started = false;
+            return Date.now() - this.timingStart;
         }
     }
 
-    read() {
-        return this.time;
-    }
-
     reset() {
-        this.time = 0;
         this.started = false;
     }
 }

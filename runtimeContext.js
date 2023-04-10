@@ -1,13 +1,14 @@
-const RuntimeMonitor = require("./runtimeMonitor");
-
 class RuntimeContext {
-    constructor() {
-        this.monitor = new RuntimeMonitor();
+    constructor(asyncMode) {
+        this.monitor = asyncMode.monitor();
+        //todo: one monitor per run instead?
     }
 
+    // Set up mocks
+
     mockImplementationWithModel(mock, implementation, model) {
-        const implementationWithNotif = () => {
-            this.monitor.notify(mock, model);
+        const implementationWithNotif = async () => {
+            await this.monitor.notify(mock, model);
             return implementation();
         };
         mock.mockImplementation(implementationWithNotif);
@@ -17,21 +18,36 @@ class RuntimeContext {
         this.mockImplementationWithModel(mock, () => {}, model);
     }
 
-    repeat(runs, func) {
+    // Run tests
+
+    async repeat(runs, func, asyncMode) {
         for (let i = 0; i < runs; i++) {
-            this.monitor.handle(func);
+            await this.monitor.handle(func); 
         }
         return this;
     }
 
-    getMeanRuntime() {
-        return this.monitor.getMeanRuntime();
-    }
+    // async repeatConcurrently(runs, func) {
+    //     //set up monitors for runs
+    //     promises = []
+    //     for (let i = 0; i < runs; i++) {
+    //         promises.push(this.monitor.handle(func)); 
+    //     }
+    //     return Promise.all(promises);
+    // }
 
-    //todo: implement expects
+    //todo async repeat? may need to have one instance of mock per test D: 
 
     clearContext() {
         this.monitor.resetMonitor();
+    }
+
+    runtimeMean() {
+        return this.monitor.getMeanRuntime();
+    }
+
+    runtimePercentile(p) {
+        return this.monitor.getRuntimePercentile(p);
     }
 
 }
