@@ -27,7 +27,6 @@ class SerialRuntimeMonitor extends RuntimeMonitor{
 
         this.resetCurrRun();
     }
-
 }
 
 module.exports = SerialRuntimeMonitor;

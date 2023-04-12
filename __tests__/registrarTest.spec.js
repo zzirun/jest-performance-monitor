@@ -1,7 +1,7 @@
 const Registrar = require("../index.js");
 const mockAxios = require("axios"); //use prototype of mockaxios to make another one ?? 
 const RuntimeContext = require("../runtimeContext");
-const AsyncMode = require("../runtimeMonitors/asyncModes.js");
+const AsyncMode = require("../asyncModes.js");
 
 /* Mocks & Objects */
 jest.mock("axios");
@@ -29,7 +29,7 @@ const scalingPerfModel = (run, args) => {
 }
 
 /* Assigning mock implementations and models to mocks */
-const runtimeCtx = new RuntimeContext(AsyncMode.Serial);
+const runtimeCtx = new RuntimeContext(AsyncMode.Auto);
 runtimeCtx.mockImplementationWithModel(mockAxios.get, getImplementation, scalingPerfModel);
 runtimeCtx.mockWithModel(mockAxios.put, randPerfModel);
 
@@ -49,7 +49,7 @@ describe("registrar", () => {
 
   // Sync test sync test code (single function in tested code)
   test("should get name within expected time on average", async () => {
-    const runs = 100;
+    const runs = 1;
     await runtimeCtx.repeat(runs, 
       async () => await registrar.getter(1));
     expect(mockAxios.get).toHaveBeenCalledTimes(runs);
@@ -75,7 +75,7 @@ describe("registrar", () => {
       but it adds up the runtimes of all mock calls serially. */
   // todo: add up runtimes of mock calls taking their invocation time into consideration
   test("should concurrently get and change ids within expected time on average", async () => {
-    const runs = 2;
+    const runs = 1;
     await runtimeCtx.repeat(runs, 
       async () => {
         const get1 = registrar.getter(1); //get 

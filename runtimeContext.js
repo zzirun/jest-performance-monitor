@@ -2,7 +2,6 @@ class RuntimeContext {
     constructor(asyncMode) {
         this.monitoring = false;
         this.monitor = asyncMode.monitor();
-        //todo: one monitor per run instead?
     }
 
     // Set up mocks
@@ -24,6 +23,7 @@ class RuntimeContext {
     // Run tests
 
     async repeat(runs, func) {
+        //todo: use asynclocalstorage to set up one monitor per run
         this.monitoring = true;
         for (let i = 0; i < runs; i++) {
             await this.monitor.handle(func); 
@@ -39,8 +39,6 @@ class RuntimeContext {
     //     }
     //     return Promise.all(promises);
     // }
-
-    //todo async repeat? may need to have one instance of mock per test D: 
 
     clearContext() {
         this.monitor.resetMonitor();

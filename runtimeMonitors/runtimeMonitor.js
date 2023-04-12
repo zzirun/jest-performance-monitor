@@ -20,7 +20,6 @@ class RuntimeMonitor {
     }
 
     getMeanRuntime() {
-        console.log("runs: " + this.runs);
         return this.totalTiming/this.runs;
     }
 

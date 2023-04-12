@@ -6,7 +6,6 @@ class ParallelRuntimeMonitor extends RuntimeMonitor{
     }
 
     /* Called when mock associated with model is called once */
-    //todo: calculate start time based on (passed in?) execution order rather than real time
     async notify(mock, model) {
         const startTime = this.runtimeStopwatch.read();
         this.mockStartTimes.push(startTime);

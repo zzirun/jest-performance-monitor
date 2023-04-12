@@ -1,9 +1,11 @@
-const ParallelRuntimeMonitor = require("./parallelRuntimeMonitor");
-const SerialRuntimeMonitor = require("./serialRuntimeMonitor");
+const AutoRuntimeMonitor = require("./runtimeMonitors/autoRuntimeMonitor");
+const ParallelRuntimeMonitor = require("./runtimeMonitors/parallelRuntimeMonitor");
+const SerialRuntimeMonitor = require("./runtimeMonitors/serialRuntimeMonitor");
 
 class AsyncMode {
     static Serial = new AsyncMode('Serial');
     static Parallel = new AsyncMode('Parallel');
+    static Auto = new AsyncMode('Auto');
   
     constructor(name) {
       this.name = name;
@@ -18,6 +20,8 @@ class AsyncMode {
             return new SerialRuntimeMonitor(); 
         } else if (this.name == 'Parallel') {
             return new ParallelRuntimeMonitor(); 
+        } else if (this.name == 'Auto') {
+            return new AutoRuntimeMonitor();
         }
     }
 }
