@@ -6,10 +6,10 @@ class RuntimeContext {
 
     // Set up mocks
 
-    mockImplementationWithModel(mock, implementation, model) {
-        const implementationWithNotif = async () => {
+    mockImpWithModel(mock, implementation, model) {
+        const implementationWithNotif = () => {
             if (this.monitoring) {
-                await this.monitor.notify(mock, model);
+                this.monitor.notify(mock, model);
             }
             return implementation();
         };
@@ -17,7 +17,21 @@ class RuntimeContext {
     }
 
     mockWithModel(mock, model) {
-        this.mockImplementationWithModel(mock, () => {}, model);
+        this.mockImpWithModel(mock, () => {}, model);
+    }
+
+    mockImpWithModelAsync(mock, implementation, model) {
+        const implementationWithNotif = async () => {
+            if (this.monitoring) {
+                await this.monitor.asyncNotify(mock, model);
+            }
+            return implementation();
+        };
+        mock.mockImplementation(implementationWithNotif);
+    }
+
+    mockWithModelAsync(mock, model) {
+        this.mockImpWithModelAsync(mock, () => {}, model);
     }
 
     // Run tests

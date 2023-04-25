@@ -6,7 +6,7 @@ class ParallelRuntimeMonitor extends RuntimeMonitor{
     }
 
     /* Called when mock associated with model is called once */
-    async notify(mock, model) {
+    notify(mock, model) {
         const startTime = this.runtimeStopwatch.read();
         this.mockStartTimes.push(startTime);
 
@@ -16,6 +16,10 @@ class ParallelRuntimeMonitor extends RuntimeMonitor{
 
         const endTime = startTime + time;
         this.mockEndTimes.push(endTime);
+    }
+    
+    async asyncNotify(mock, model) {
+        this.notify(mock, model);
     }
 
     calcTotalMockTiming() {

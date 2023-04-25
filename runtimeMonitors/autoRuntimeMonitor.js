@@ -15,7 +15,6 @@ const parents = new Map();
 class AutoRuntimeMonitor extends RuntimeMonitor{
     constructor() {
         super();  
-        
     } 
 
     getParentEndTime(parentId, currId) {
@@ -38,33 +37,61 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         return parentEndTime;
     }
 
-    /* Called when mock associated with model is called once */
-    async notify(mock, model) {
-        this.maxDependencyLength++;
-        var parentId = asyncHooks.triggerAsyncId();
-        const currId = asyncHooks.executionAsyncId();
-
-        // Finding parent end time
-        const parentEndTime = this.getParentEndTime(parentId, currId);
-        
+    getCurrEndTime(mock, model, parentEndTime) {
         const run = mock.mock.calls.length;
         const args = mock.mock.calls[run - 1];
-        const time = model(run, args);
-        const currEndTime = parentEndTime + time;
-
-        // Compare and set longest duration (esp for id = 0 case)
-        const existingTime = this.endingTimes.get(currId) ?? 0;
-        const longestTime = currEndTime > existingTime ? currEndTime : existingTime;
-        this.endingTimes.set(currId, longestTime);
-
-        this.latestEndTime = (longestTime>this.latestEndTime) ? longestTime : this.latestEndTime;
+        const virtualTime = model(run, args);
         
-        debug('Parent id: ', parentId,
-            '\nCurr id:', currId,
-            '\nParent End Time: ', parentEndTime,
-            '\nTime generated: ', time,
-            '\nNew End time: ', currEndTime,
-            '\nLongest End time: ', longestTime,
+        const realTime = this.runtimeStopwatch.read();
+        this.runtimeStopwatch.reset();
+        this.runtimeStopwatch.start();
+        const currEndTime = parentEndTime + virtualTime + realTime;
+
+        debug('Parent End Time: ', parentEndTime,
+            '\nTime generated: ', virtualTime,
+            '\nReal time elapsed: ', realTime);
+            
+        return currEndTime;
+    }
+
+    notify(mock, model) {
+        this.maxDependencyLength++;
+
+        // Finding dependencies
+        var parentId = asyncHooks.triggerAsyncId();
+        const currId = asyncHooks.executionAsyncId();
+        debug('\nParent id: ', parentId,
+            '\nCurr id:', currId);
+
+        // Finding end time
+        const parentEndTime = this.getParentEndTime(parentId, currId);
+        const currEndTime = this.getCurrEndTime(mock, model, parentEndTime);
+
+        this.endingTimes.set(parentId, currEndTime);
+        this.latestEndTime = (currEndTime>this.latestEndTime) ? currEndTime : this.latestEndTime;
+        
+        debug('New End time for parentid: ', currEndTime,
+            '\nUpdated latest End time: ', this.latestEndTime);
+    }
+
+    /* Called when mock associated with model is called once */
+    async asyncNotify(mock, model) {
+        this.maxDependencyLength++;
+
+        // Finding dependencies
+        var parentId = asyncHooks.triggerAsyncId();
+        const currId = asyncHooks.executionAsyncId();
+        debug('\nParent id: ', parentId,
+            '\nCurr id:', currId);
+
+        // Finding end time
+        const parentEndTime = this.getParentEndTime(parentId, currId);
+        const currEndTime = this.getCurrEndTime(mock, model, parentEndTime);
+
+        this.endingTimes.set(currId, currEndTime);
+        this.latestEndTime = (currEndTime>this.latestEndTime) ? currEndTime : this.latestEndTime;
+        
+        debug('New End time for currid: ', currEndTime,
             '\nUpdated latest End time: ', this.latestEndTime);
     }
 
@@ -72,9 +99,20 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         // Setup: Async hook
         function init(asyncId, type, triggerAsyncId, resource) {
             // debug(asyncId, type, triggerAsyncId);
+            // debug('init', asyncId, asyncHooks.executionAsyncId(), triggerAsyncId);
             parents.set(asyncId, triggerAsyncId);
         }
-        var asyncHook = asyncHooks.createHook({init});
+        function before(asyncId) { 
+            // debug('before', asyncId, asyncHooks.executionAsyncId());
+        }
+        function after(asyncId) { 
+            // debug('after', asyncId, asyncHooks.executionAsyncId());
+        }
+        function promiseResolve(asyncId) { 
+            // debug('promise resolve', asyncId, asyncHooks.executionAsyncId());
+        }
+
+        var asyncHook = asyncHooks.createHook({init, before, after, promiseResolve});
         asyncHook.enable();
         
         // Setup: Timing info
@@ -98,6 +136,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         // Cleanup
         this.resetCurrRun();
         asyncHook.disable();
+        
     }
 }
 
