@@ -7,14 +7,26 @@ class SerialRuntimeMonitor extends RuntimeMonitor{
     }
 
     /* Called when mock associated with model is called once */
-    notify(mock, model) {
+    notify(mock, model, name) {
         const run = mock.mock.calls.length;
         const args = mock.mock.calls[run - 1];
-        this.currTiming += model(run, args);
+        const virtualTime = model(run, args);
+        
+        const realTime = this.runtimeStopwatch.read();
+        this.runtimeStopwatch.reset();
+        this.runtimeStopwatch.start();
+
+        const currStart = this.currTiming;
+        const currEnd = currStart + virtualTime + realTime;
+        this.currTiming = currEnd;
+
+        const virtualEnd = currStart + virtualTime;
+        this.timeline.push({name: name, start: currStart, end: virtualEnd});
+        this.timeline.push({name: "real time", start: virtualEnd, end: currEnd});
     }
 
-    async asyncNotify(mock, model) {
-        this.notify(mock, model);
+    async asyncNotify(mock, model, name) {
+        this.notify(mock, model, name);
     }
 
     async handle(func) {
@@ -28,7 +40,7 @@ class SerialRuntimeMonitor extends RuntimeMonitor{
 
         this.runTimings.push(this.currTiming);
         this.totalTiming += this.currTiming;
-
+        this.timelines.push({timing: this.currTiming, timeline: this.timeline});
         this.resetCurrRun();
     }
 }

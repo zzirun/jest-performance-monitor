@@ -6,7 +6,7 @@ class ParallelRuntimeMonitor extends RuntimeMonitor{
     }
 
     /* Called when mock associated with model is called once */
-    notify(mock, model) {
+    notify(mock, model, name) {
         const startTime = this.runtimeStopwatch.read();
         this.mockStartTimes.push(startTime);
 
@@ -16,10 +16,12 @@ class ParallelRuntimeMonitor extends RuntimeMonitor{
 
         const endTime = startTime + time;
         this.mockEndTimes.push(endTime);
+        this.timeline.push({name: "real time", start: 0, end: startTime});
+        this.timeline.push({name: name, start: startTime, end: endTime});
     }
     
-    async asyncNotify(mock, model) {
-        this.notify(mock, model);
+    async asyncNotify(mock, model, name) {
+        this.notify(mock, model, name);
     }
 
     calcTotalMockTiming() {
@@ -42,7 +44,7 @@ class ParallelRuntimeMonitor extends RuntimeMonitor{
 
         this.runTimings.push(this.currTiming);
         this.totalTiming += this.currTiming;
-
+        this.timelines.push({timing: this.currTiming, timeline: this.timeline});
         this.resetCurrRun();
     }
 }

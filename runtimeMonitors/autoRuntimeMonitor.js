@@ -1,5 +1,5 @@
 const RuntimeMonitor = require("./runtimeMonitor");
-const asyncHooks = require('node:async_hooks');
+const asyncHooks = require('async_hooks');
 const fs = require('fs');
 const util = require('util');
 
@@ -27,6 +27,9 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
                     parentId = parents.get(parentId);
                     i++;
                 }
+                if (parentId == 0) {
+                    
+                }
                 parentEndTime = this.endingTimes.get(parentId) ?? 0;
             } else {
                 // if parentId == currId, they are both == 0 (i.e. no stack above it)
@@ -37,7 +40,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         return parentEndTime;
     }
 
-    getCurrEndTime(mock, model, parentEndTime) {
+    getCurrEndTime(mock, model, parentEndTime, name) {
         const run = mock.mock.calls.length;
         const args = mock.mock.calls[run - 1];
         const virtualTime = model(run, args);
@@ -46,15 +49,18 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         this.runtimeStopwatch.reset();
         this.runtimeStopwatch.start();
         const currEndTime = parentEndTime + virtualTime + realTime;
+        const realEndTime = parentEndTime + realTime;
 
         debug('Parent End Time: ', parentEndTime,
             '\nTime generated: ', virtualTime,
             '\nReal time elapsed: ', realTime);
-            
+        
+        this.timeline.push({name: "real time", start: parentEndTime, end: realEndTime});
+        this.timeline.push({name: name, start: realEndTime, end: currEndTime});
         return currEndTime;
     }
 
-    notify(mock, model) {
+    notify(mock, model, name) {
         this.maxDependencyLength++;
 
         // Finding dependencies
@@ -65,7 +71,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
 
         // Finding end time
         const parentEndTime = this.getParentEndTime(parentId, currId);
-        const currEndTime = this.getCurrEndTime(mock, model, parentEndTime);
+        const currEndTime = this.getCurrEndTime(mock, model, parentEndTime, name);
 
         this.endingTimes.set(parentId, currEndTime);
         this.latestEndTime = (currEndTime>this.latestEndTime) ? currEndTime : this.latestEndTime;
@@ -75,7 +81,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
     }
 
     /* Called when mock associated with model is called once */
-    async asyncNotify(mock, model) {
+    async asyncNotify(mock, model, name) {
         this.maxDependencyLength++;
 
         // Finding dependencies
@@ -86,7 +92,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
 
         // Finding end time
         const parentEndTime = this.getParentEndTime(parentId, currId);
-        const currEndTime = this.getCurrEndTime(mock, model, parentEndTime);
+        const currEndTime = this.getCurrEndTime(mock, model, parentEndTime, name);
 
         this.endingTimes.set(currId, currEndTime);
         this.latestEndTime = (currEndTime>this.latestEndTime) ? currEndTime : this.latestEndTime;
@@ -130,6 +136,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         this.currTiming += this.latestEndTime;
         this.runTimings.push(this.currTiming);
         this.totalTiming += this.currTiming;
+        this.timelines.push({timing: this.currTiming, timeline: this.timeline});
         debug("Final latest End time: ", this.latestEndTime,
             "\nTiming: ", this.currTiming);
 

@@ -13,6 +13,9 @@ class RuntimeMonitor {
         this.currTiming = 0;
         this.mockStartTimes = [];
         this.mockEndTimes = [];
+
+        this.timelines = [];
+        this.timeline = [];
     }
 
     getTotalRuntime() {
@@ -27,11 +30,16 @@ class RuntimeMonitor {
         return percentile(p, this.runTimings);
     }
 
+    getTimelines() {
+        return this.timelines;
+    }
+
     resetCurrRun() {
         this.runtimeStopwatch.reset();
         this.currTiming = 0;
         this.mockStartTimes = [];
         this.mockEndTimes = [];
+        this.timeline = [];
 
         return this;
     }
@@ -42,6 +50,8 @@ class RuntimeMonitor {
         this.runs = 0;
 
         this.resetCurrRun();
+        this.timeline = [];
+        this.timelines = [];
         return this;
     }
 }

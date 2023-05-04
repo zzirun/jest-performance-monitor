@@ -1,3 +1,5 @@
+const { timelinesProcessor } = require("./runtimeDisplay/timelinesProcessor.js");
+
 class RuntimeContext {
     constructor(asyncMode) {
         this.monitoring = false;
@@ -6,41 +8,45 @@ class RuntimeContext {
 
     // Set up mocks
 
-    mockImpWithModel(mock, implementation, model) {
+    mockImpWithModel(mock, name, implementation, model) {
         const implementationWithNotif = () => {
             if (this.monitoring) {
-                this.monitor.notify(mock, model);
+                this.monitor.notify(mock, model, name);
             }
             return implementation();
         };
         mock.mockImplementation(implementationWithNotif);
     }
 
-    mockWithModel(mock, model) {
-        this.mockImpWithModel(mock, () => {}, model);
+    mockWithModel(mock, name, model) {
+        this.mockImpWithModel(mock, name, () => {}, model);
     }
 
-    mockImpWithModelAsync(mock, implementation, model) {
+    mockImpWithModelAsync(mock, name, implementation, model) {
         const implementationWithNotif = async () => {
             if (this.monitoring) {
-                await this.monitor.asyncNotify(mock, model);
-            }
+                await this.monitor.asyncNotify(mock, model, name);
+            } 
             return implementation();
         };
         mock.mockImplementation(implementationWithNotif);
     }
 
-    mockWithModelAsync(mock, model) {
-        this.mockImpWithModelAsync(mock, () => {}, model);
+    mockWithModelAsync(mock, name, model) {
+        this.mockImpWithModelAsync(mock, name, () => {}, model);
     }
 
     // Run tests
 
-    async repeat(runs, func) {
+    async repeat(runs, func, desc) {
         //todo: use asynclocalstorage to set up one monitor per run
         this.monitoring = true;
         for (let i = 0; i < runs; i++) {
             await this.monitor.handle(func); 
+        }
+
+        if (desc) {
+            timelinesProcessor.loadTimelines(desc, this.monitor.getTimelines());
         }
         return this;
     }
