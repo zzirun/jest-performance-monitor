@@ -586,7 +586,7 @@ async function handleTimelines() {
         timelineTable.style.width = "100%";
         timelineTable.style.tableLayout = "fixed";
         let timelineTableRow = document.createElement("tr");
-        let height = data[0].timeline.length < 5 ? 200 : 300;
+        let height = 200 + data[0].timeline.length * 18;
         timelineTableRow.style.height = height.toString() + "px";
         let longTimelineCell = document.createElement("td");
         const long = longestTiming(timings);
@@ -627,7 +627,7 @@ function printTimeline(title, times, report, long) {
     report.appendChild(chart);
     // Filling in data
     let datasets = [];
-    maxY = times.length * 1.5;
+    maxY = times.length * 1.3;
     for(i in times){
         let data = times[i];
         console.log(data);

@@ -1,7 +1,7 @@
 class RuntimeStopwatch {
     constructor() {
-        this.time = 0;
         this.started = false;
+        this.prev = 0;
     }
 
     start() {
@@ -11,20 +11,16 @@ class RuntimeStopwatch {
         }
     }
 
-    // stop() {
-    //     if (!this.started) {
-    //         throw new Error("Test Clock has not been started!");
-    //     } else {
-    //         this.time += Date.now() - this.timingStart;
-    //         this.started = false;
-    //     }
-    // }
+    prevRead() {
+        return this.prev;
+    }
 
     read() {
         if (!this.started) {
             throw new Error("Test Clock has not been started!");
         } else {
-            return Date.now() - this.timingStart;
+            this.prev = Date.now() - this.timingStart;
+            return this.prev;
         }
     }
 

@@ -41,8 +41,8 @@ class Registrar {
 
   async changeId(oldId, newId) {
     let res = await axios.get(`https://swapi.dev/api/people/${oldId}/`);
-    const put = await axios.put(`https://swapi.dev/api/people/`, {id: newId, name: res.data.name});
-    return Promise.allSettled([put]);
+    let put = await axios.put(`https://swapi.dev/api/people/`, {id: newId, name: res.data.name});
+    return Promise.allSettled([res, put]);
   }
 
   async putAndGetId(oldId, newId) {
@@ -67,6 +67,44 @@ class Registrar {
     }
     const put = axios.put(`https://swapi.dev/api/people/`, {id: res, name: 'blah'})
     return Promise.allSettled([put, get2]);
+  }
+
+  async doubleGetId(id) {
+    let res = await axios.get(`https://swapi.dev/api/people/${id}/`);
+    let res2 = await axios.get(`https://swapi.dev/api/people/${id}/`);
+  }
+
+  async mixedIdCalls() {
+    await this.registerId(1);
+    await this.mixedIdCalls2();
+    await this.getId(1);
+    // await this.modifyIds(1);
+    // await this.doubleGetId(1);
+    // await this.getId(1);
+    // await this.changeId(1, 2);
+    // await this.registerId(1);
+    // await this.doubleGetId(1, 2);
+    // await this.doubleGetId(2, 1);
+    
+
+    // this.addUp(1, 2);
+  }
+
+  async mixedIdCalls2() {
+    await this.registerId(1);
+    await this.getId(1);
+    let finalres = await this.doubleGetId(1);
+    return Promise.allSettled([finalres]);
+    // await this.doubleGetId(1, 2);
+    // await this.doubleGetId(2, 1);
+  }
+
+  async mixedIdCallsAsync() {
+    await this.getId(1);
+    const get1 = this.getId(1); //get
+    const change1 = this.putAndGetId(1, 2); // get and then put
+    const get2 = this.getId(1); //get
+    return Promise.allSettled([get1, get2, change1]);
   }
 
 }

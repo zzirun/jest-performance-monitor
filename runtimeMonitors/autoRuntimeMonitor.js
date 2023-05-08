@@ -17,7 +17,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         super();  
     } 
 
-    getParentEndTime(parentId, currId) {
+    getParentEndTime(parentId, currId, sync) {
         // Finding parent end time
         var parentEndTime = 0;
         if (this.endingTimes.size > 0) {
@@ -25,6 +25,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
                 var i = 0;
                 while (!this.endingTimes.has(parentId) && i < this.maxDependencyLength * 100) {
                     parentId = parents.get(parentId);
+                    debug(parentId)
                     i++;
                 }
                 if (parentId == 0) {
@@ -33,31 +34,48 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
                 parentEndTime = this.endingTimes.get(parentId) ?? 0;
             } else {
                 // if parentId == currId, they are both == 0 (i.e. no stack above it)
-                // thus we can leave parentEndTime as 0
+                // thus we can leave parentEndTime as 0 if async exec
                 debug("Same parent and curr id: ", parentId, currId);
+                if (sync) {
+                    parentEndTime = this.endingTimes.get(parentId) ?? 0; 
+                }
             }
         } 
         return parentEndTime;
     }
 
-    getCurrEndTime(mock, model, parentEndTime, name) {
+    getCurrEndTime(mock, model, parentEndTime, name, sync) {
+        //Calculating timings
         const run = mock.mock.calls.length;
         const args = mock.mock.calls[run - 1];
         const virtualTime = model(run, args);
-        
         const realTime = this.runtimeStopwatch.read();
-        this.runtimeStopwatch.reset();
-        this.runtimeStopwatch.start();
-        const currEndTime = parentEndTime + virtualTime + realTime;
-        const realEndTime = parentEndTime + realTime;
 
         debug('Parent End Time: ', parentEndTime,
             '\nTime generated: ', virtualTime,
             '\nReal time elapsed: ', realTime);
-        
-        this.timeline.push({name: "real time", start: parentEndTime, end: realEndTime});
-        this.timeline.push({name: name, start: realEndTime, end: currEndTime});
-        return currEndTime;
+
+        const virtualStartTime = parentEndTime + realTime;
+        const currEndTime = parentEndTime + virtualTime + realTime;
+
+        // Updating timeline
+        if (sync && this.latestEndTime <= parentEndTime || !sync) {
+            this.timeline.push({name: "real time", start: parentEndTime, end: virtualStartTime});
+        }
+        this.timeline.push({name: name, start: virtualStartTime, end: currEndTime});
+        this.latestEndTime = (currEndTime>this.latestEndTime) ? currEndTime : this.latestEndTime;
+
+        // To be pushed into endingTimes
+        const virtualEndTime = parentEndTime + virtualTime;
+        return virtualEndTime;
+    }
+
+    setMaxEndTime(id, time) {
+        let maxEndTime = time;
+        if (this.endingTimes.has(id)) {
+            maxEndTime = time > this.endingTimes.get(id) ? time : this.endingTimes.get(id);
+        }
+        this.endingTimes.set(id, maxEndTime);
     }
 
     notify(mock, model, name) {
@@ -70,13 +88,11 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
             '\nCurr id:', currId);
 
         // Finding end time
-        const parentEndTime = this.getParentEndTime(parentId, currId);
-        const currEndTime = this.getCurrEndTime(mock, model, parentEndTime, name);
+        const parentEndTime = this.getParentEndTime(parentId, currId, true);
+        const virtualEndTime = this.getCurrEndTime(mock, model, parentEndTime, name, true);
+        this.setMaxEndTime(parentId, virtualEndTime);
 
-        this.endingTimes.set(parentId, currEndTime);
-        this.latestEndTime = (currEndTime>this.latestEndTime) ? currEndTime : this.latestEndTime;
-        
-        debug('New End time for parentid: ', currEndTime,
+        debug('New End time for parentId: ', virtualEndTime,
             '\nUpdated latest End time: ', this.latestEndTime);
     }
 
@@ -92,33 +108,20 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
 
         // Finding end time
         const parentEndTime = this.getParentEndTime(parentId, currId);
-        const currEndTime = this.getCurrEndTime(mock, model, parentEndTime, name);
+        const virtualEndTime = this.getCurrEndTime(mock, model, parentEndTime, name);
+        this.setMaxEndTime(currId, virtualEndTime);
 
-        this.endingTimes.set(currId, currEndTime);
-        this.latestEndTime = (currEndTime>this.latestEndTime) ? currEndTime : this.latestEndTime;
-        
-        debug('New End time for currid: ', currEndTime,
+        debug('New End time for currid: ', virtualEndTime,
             '\nUpdated latest End time: ', this.latestEndTime);
     }
 
     async handle(func) {
         // Setup: Async hook
         function init(asyncId, type, triggerAsyncId, resource) {
-            // debug(asyncId, type, triggerAsyncId);
-            // debug('init', asyncId, asyncHooks.executionAsyncId(), triggerAsyncId);
             parents.set(asyncId, triggerAsyncId);
         }
-        function before(asyncId) { 
-            // debug('before', asyncId, asyncHooks.executionAsyncId());
-        }
-        function after(asyncId) { 
-            // debug('after', asyncId, asyncHooks.executionAsyncId());
-        }
-        function promiseResolve(asyncId) { 
-            // debug('promise resolve', asyncId, asyncHooks.executionAsyncId());
-        }
 
-        var asyncHook = asyncHooks.createHook({init, before, after, promiseResolve});
+        var asyncHook = asyncHooks.createHook({init});
         asyncHook.enable();
         
         // Setup: Timing info
@@ -132,7 +135,8 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         await func();
 
         // Recording timing
-        this.currTiming += this.runtimeStopwatch.read();
+        let prevRealTime = this.runtimeStopwatch.prevRead();
+        this.currTiming += this.runtimeStopwatch.read() - prevRealTime;
         this.currTiming += this.latestEndTime;
         this.runTimings.push(this.currTiming);
         this.totalTiming += this.currTiming;

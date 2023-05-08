@@ -8,34 +8,27 @@ class RuntimeContext {
 
     // Set up mocks
 
-    mockImpWithModel(mock, name, implementation, model) {
+    mockWithModel(mock, name, model, imp) {
         const implementationWithNotif = () => {
             if (this.monitoring) {
                 this.monitor.notify(mock, model, name);
             }
-            return implementation();
+            let impl = imp || (() => {});
+            return impl();
         };
         mock.mockImplementation(implementationWithNotif);
     }
 
-    mockWithModel(mock, name, model) {
-        this.mockImpWithModel(mock, name, () => {}, model);
-    }
-
-    mockImpWithModelAsync(mock, name, implementation, model) {
+    mockWithModelAsync(mock, name, model, imp) {
         const implementationWithNotif = async () => {
             if (this.monitoring) {
                 await this.monitor.asyncNotify(mock, model, name);
             } 
-            return implementation();
+            let impl = imp || (() => {});
+            return impl();
         };
         mock.mockImplementation(implementationWithNotif);
     }
-
-    mockWithModelAsync(mock, name, model) {
-        this.mockImpWithModelAsync(mock, name, () => {}, model);
-    }
-
     // Run tests
 
     async repeat(runs, func, desc) {
