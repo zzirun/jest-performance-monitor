@@ -3,14 +3,17 @@ const asyncHooks = require('async_hooks');
 const fs = require('fs');
 const util = require('util');
 
+const verbose = true;
+const parents = new Map();
+
 // Utility function for synchronous printing
 // Since console.log is an async op, calling it causes AsyncHook callbacks to be created
 // Which can create infinite recursion.
 function debug(...args) {
-    fs.writeFileSync(1, `${util.format(...args)}\n`, { flag: 'a' });
+    if (verbose) {
+        fs.writeFileSync(1, `${util.format(...args)}\n`, { flag: 'a' });
+    }
 } 
-
-const parents = new Map();
 
 class AutoRuntimeMonitor extends RuntimeMonitor{
     constructor(timeUnit, assumeSerialThreshold) {
@@ -18,10 +21,42 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         this.assumeSerialThreshold = assumeSerialThreshold ? assumeSerialThreshold : 0.1;
     } 
 
+    /*  Reads current time from stopwatch and sets it for id in real time map */
     getRealTime(currId) {
         let time = this.runtimeStopwatch.read();
         this.realTimes.set(currId, time);
         return time;
+    }
+
+    /*  Checks if id should be parent or if too much time has elapsed 
+        and its most recent descendant should be parent */
+    checkDescendantsForParent(pId, currId, realTime) {
+        let parentId = pId;
+        // check if parentId has had children before
+        if (this.visitedParentIds.has(parentId)) {
+            // find most recent descendant of parent id
+            let recentChildId = parentId;
+            while (this.visitedParentIds.has(recentChildId)) {
+                let id = this.visitedParentIds.get(recentChildId);
+                if (currId != id) {
+                    recentChildId = id;
+                } else {
+                    break;
+                }
+            }
+            // find real time elapsed since that child id 
+            let timeElapsed = realTime - this.realTimes.get(recentChildId);
+            /*  if it's been too long since the child id was called,
+                it's more likely that the current execution is 
+                scheduled after it instead of parallel to it. */
+            // take that child id as actual parent if threshold of time elapsed is exceeded
+            if (timeElapsed > this.assumeSerialThreshold) {
+                debug("Time elapsed since recent child exceeds threshold.", 
+                    "\nNew parent id: ", recentChildId)
+                parentId = recentChildId;
+            }
+        } 
+        return parentId;
     }
 
     getParentEndTime(parentId, currId, realTime, sync) {
@@ -35,21 +70,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
                     parentId = parents.get(parentId);
                     i++;
                 }
-                if (this.visitedParentIds.has(parentId)) {
-                    // parentId has been visited before
-                    // find most recently visited child id 
-                    let recentChildId = parentId
-                    while (this.visitedParentIds.has(recentChildId)) {
-                        recentChildId = this.visitedParentIds.get(recentChildId);
-                    }
-                    // find real time elapsed since that child id 
-                    let recentChildTime = this.realTimes.get(recentChildId);
-                    let timeElapsed = realTime - recentChildTime;
-                    // take that child id as actual parent if threshold of time elapsed is exceeded
-                    if (timeElapsed > this.assumeSerialThreshold) {
-                        parentId = recentChildId;
-                    }
-                } 
+                parentId = this.checkDescendantsForParent(parentId, currId, realTime)
                 this.visitedParentIds.set(parentId, currId);
                 parentEndTime = this.endingTimes.get(parentId) ?? 0;
             } else {

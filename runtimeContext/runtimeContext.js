@@ -4,6 +4,7 @@ class RuntimeContext {
     constructor(asyncMode, timeUnit, assumeSerialThreshold) {
         this.monitoring = false;
         this.timeUnit = timeUnit;
+        console.log(assumeSerialThreshold)
         this.monitor = asyncMode.monitor(timeUnit, assumeSerialThreshold);
     }
 

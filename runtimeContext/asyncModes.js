@@ -15,13 +15,13 @@ class AsyncMode {
       return `Color.${this.name}`;
     }
 
-    monitor(timeUnit) {
+    monitor(timeUnit, assumeSerialThreshold) {
         if (this.name == 'Serial') {
             return new SerialRuntimeMonitor(timeUnit); 
         } else if (this.name == 'Parallel') {
             return new ParallelRuntimeMonitor(timeUnit); 
         } else if (this.name == 'Auto') {
-            return new AutoRuntimeMonitor(timeUnit);
+            return new AutoRuntimeMonitor(timeUnit, assumeSerialThreshold);
         }
     }
 }

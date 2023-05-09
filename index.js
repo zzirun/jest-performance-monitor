@@ -78,31 +78,19 @@ class Registrar {
     await this.registerId(1);
     await this.mixedIdCalls2();
     await this.getId(1);
-    // await this.modifyIds(1);
-    // await this.doubleGetId(1);
-    // await this.getId(1);
-    // await this.changeId(1, 2);
-    // await this.registerId(1);
-    // await this.doubleGetId(1, 2);
-    // await this.doubleGetId(2, 1);
-    
-
-    // this.addUp(1, 2);
   }
 
   async mixedIdCalls2() {
-    await this.registerId(1);
-    await this.getId(1);
-    let finalres = await this.doubleGetId(1);
-    return Promise.allSettled([finalres]);
-    // await this.doubleGetId(1, 2);
-    // await this.doubleGetId(2, 1);
+    await this.doubleGetId(2, 1);
+    await this.changeId(1, 2);
+    await this.putAndGetId(2, 1);
+    await this.getId(1);    
   }
 
   async mixedIdCallsAsync() {
     await this.getId(1);
     const get1 = this.getId(1); //get
-    const change1 = this.putAndGetId(1, 2); // get and then put
+    const change1 = this.putAndGetId(1, 2); // put and then get
     const get2 = this.getId(1); //get
     return Promise.allSettled([get1, get2, change1]);
   }

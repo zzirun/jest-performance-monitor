@@ -36,7 +36,7 @@ const scalingPerfModel = (run, args) => {
 }
 
 /* Assigning mock implementations and models to mocks */
-const runtimeCtx = new RuntimeContext(AsyncMode.Auto, TimeUnit.millisecond, 0.1);
+const runtimeCtx = new RuntimeContext(AsyncMode.Auto, TimeUnit.millisecond, 0.05);
 runtimeCtx.mockWithModelAsync(mockAxios.get, "get", scalingPerfModel, getImplementation);
 runtimeCtx.mockWithModelAsync(mockAxios.put, "put", randPerfModel, getImplementation);
 runtimeCtx.mockWithModel(mockMath.add, "add", randPerfModel)
@@ -74,8 +74,8 @@ describe("registrar", () => {
         await registrar.mixedIdCalls();
       },
       "Sync test code with multiple async mock calls");
-    expect(mockAxios.get).toHaveBeenCalledTimes(runs * 4);
-    expect(mockAxios.put).toHaveBeenCalledTimes(runs * 4);
+    expect(mockAxios.get).toHaveBeenCalledTimes(runs * 6);
+    expect(mockAxios.put).toHaveBeenCalledTimes(runs * 3);
     expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
   });
 
@@ -118,7 +118,7 @@ describe("registrar", () => {
     const runs = 6;
     await runtimeCtx.repeat(runs, 
       async () => {
-        await registrar.getId(1);
+        await registrar.doubleGetId(1);
         await registrar.getIdTogether();
         await registrar.getId(1);
       },
