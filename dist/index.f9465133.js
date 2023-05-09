@@ -564,6 +564,7 @@ var _randomcolor = require("randomcolor");
 var _randomcolorDefault = parcelHelpers.interopDefault(_randomcolor);
 let colours = new Map();
 async function handleTimelines() {
+    addClearButton();
     const fileList = this.files;
     const file = await fileList.item(0).text();
     const record = JSON.parse(file);
@@ -748,6 +749,25 @@ function printLegend() {
         li.appendChild(boxSpan);
         li.appendChild(textContainer);
         legendContainer.appendChild(li);
+    }
+}
+function clearTimelines() {
+    document.getElementById("input").value = "";
+    const visualizedTimelines = document.getElementById("visualizedTimelines");
+    visualizedTimelines.replaceChildren();
+    const legendContainer = document.getElementById("legend");
+    legendContainer.replaceChildren();
+    colours = new Map();
+    document.getElementById("clearButton").remove();
+}
+function addClearButton() {
+    if (!document.getElementById("clearButton")) {
+        const inputPrompt = document.getElementById("inputPrompt");
+        const clearButton = document.createElement("button");
+        clearButton.setAttribute("id", "clearButton");
+        clearButton.textContent = "Clear timelines";
+        clearButton.addEventListener("click", clearTimelines);
+        inputPrompt.appendChild(clearButton);
     }
 }
 const inputElement = document.getElementById("input");
