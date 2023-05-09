@@ -1,9 +1,9 @@
 const RuntimeMonitor = require("./runtimeMonitor");
 
 class SerialRuntimeMonitor extends RuntimeMonitor{
-    constructor() {
+    constructor(timeUnit) {
         // all runs
-        super();
+        super(timeUnit);
     }
 
     /* Called when mock associated with model is called once */

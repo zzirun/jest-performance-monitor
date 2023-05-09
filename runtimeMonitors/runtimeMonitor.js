@@ -1,15 +1,15 @@
-const RuntimeStopwatch = require("../runtimeStopwatch");
+const RuntimeStopwatch = require("../runtimeContext/runtimeStopwatch");
 const percentile = require("percentile");
 
 class RuntimeMonitor {
-    constructor() {
+    constructor(timeUnit) {
         // all runs
         this.runs = 0;
         this.runTimings = [];
         this.totalTiming = 0;
 
         // current run
-        this.runtimeStopwatch = new RuntimeStopwatch();
+        this.runtimeStopwatch = new RuntimeStopwatch(timeUnit);
         this.currTiming = 0;
         this.mockStartTimes = [];
         this.mockEndTimes = [];

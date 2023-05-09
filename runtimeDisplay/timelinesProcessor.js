@@ -6,8 +6,8 @@ class TimelinesProcessor {
         this.testsTimelines = [];
     }
 
-    loadTimelines(desc, timelines) {
-        this.testsTimelines.push({desc: desc, timelines: timelines});
+    loadTimelines(desc, timelines, timeUnit) {
+        this.testsTimelines.push({desc: desc, timelines: timelines, timeUnit: timeUnit.toString()});
     }
 
     writeResultsToFile() {

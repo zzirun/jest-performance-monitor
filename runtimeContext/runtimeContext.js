@@ -1,9 +1,10 @@
-const { timelinesProcessor } = require("./runtimeDisplay/timelinesProcessor.js");
+const { timelinesProcessor } = require("../runtimeDisplay/timelinesProcessor.js");
 
 class RuntimeContext {
-    constructor(asyncMode) {
+    constructor(asyncMode, timeUnit, assumeSerialThreshold) {
         this.monitoring = false;
-        this.monitor = asyncMode.monitor();
+        this.timeUnit = timeUnit;
+        this.monitor = asyncMode.monitor(timeUnit, assumeSerialThreshold);
     }
 
     // Set up mocks
@@ -39,7 +40,7 @@ class RuntimeContext {
         }
 
         if (desc) {
-            timelinesProcessor.loadTimelines(desc, this.monitor.getTimelines());
+            timelinesProcessor.loadTimelines(desc, this.monitor.getTimelines(), this.timeUnit);
         }
         return this;
     }

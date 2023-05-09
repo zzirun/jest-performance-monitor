@@ -18,6 +18,7 @@ async function handleTimelines() {
         report.innerHTML = '<b>' + record[testNum].desc + '</b>';
 
         //Finding timings of timelines
+        const timeUnit = record[testNum].timeUnit;
         const data = record[testNum].timelines;
         const timings = new Map();
         for (timelineNum in data) {
@@ -35,24 +36,27 @@ async function handleTimelines() {
         
         let longTimelineCell = document.createElement("td");
         const long = longestTiming(timings);
-        printTimeline("Run with longest timing: " + long.toString() + "ms", 
+        printTimeline("Run with longest timing: " + long.toString() + timeUnit, 
                         data[timings.get(long)].timeline, 
                         longTimelineCell,
-                        long);
+                        long,
+                        timeUnit);
 
         let shortTimelineCell = document.createElement("td");
         const short = shortestTiming(timings);
-        printTimeline("Run with shortest timing: " + short.toString() + "ms",
+        printTimeline("Run with shortest timing: " + short.toString() + timeUnit,
                         data[timings.get(short)].timeline, 
                         shortTimelineCell,
-                        long);
+                        long,
+                        timeUnit);
         
         let medianTimelineCell = document.createElement("td");
         const median = medianTiming(timings);
-        printTimeline("Run with median timing: " + median.toString() + "ms", 
+        printTimeline("Run with median timing: " + median.toString() + timeUnit, 
                         data[timings.get(median)].timeline, 
                         medianTimelineCell,
-                        long);
+                        long,
+                        timeUnit);
 
         //Appending printed timelines to report
         timelineTableRow.appendChild(longTimelineCell);
@@ -81,7 +85,7 @@ function medianTiming(timings) {
     return medianTime = times.slice().sort((a, b) => a - b)[Math.floor(times.length / 2)];
 }
 
-function printTimeline (title, times, report, long) {
+function printTimeline (title, times, report, long, timeUnit) {
     console.log(times);
 
     // Creating element
@@ -156,7 +160,7 @@ function printTimeline (title, times, report, long) {
                 x: {
                     title: {
                         display: true,
-                        text: 'estimated duration (ms)'
+                        text: 'estimated duration (' + timeUnit + ')'
                     },
                     type: 'linear',
                     position: 'bottom',

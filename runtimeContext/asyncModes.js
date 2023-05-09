@@ -1,6 +1,6 @@
-const AutoRuntimeMonitor = require("./runtimeMonitors/autoRuntimeMonitor");
-const ParallelRuntimeMonitor = require("./runtimeMonitors/parallelRuntimeMonitor");
-const SerialRuntimeMonitor = require("./runtimeMonitors/serialRuntimeMonitor");
+const AutoRuntimeMonitor = require("../runtimeMonitors/autoRuntimeMonitor");
+const ParallelRuntimeMonitor = require("../runtimeMonitors/parallelRuntimeMonitor");
+const SerialRuntimeMonitor = require("../runtimeMonitors/serialRuntimeMonitor");
 
 class AsyncMode {
     static Serial = new AsyncMode('Serial');
@@ -15,13 +15,13 @@ class AsyncMode {
       return `Color.${this.name}`;
     }
 
-    monitor() {
+    monitor(timeUnit) {
         if (this.name == 'Serial') {
-            return new SerialRuntimeMonitor(); 
+            return new SerialRuntimeMonitor(timeUnit); 
         } else if (this.name == 'Parallel') {
-            return new ParallelRuntimeMonitor(); 
+            return new ParallelRuntimeMonitor(timeUnit); 
         } else if (this.name == 'Auto') {
-            return new AutoRuntimeMonitor();
+            return new AutoRuntimeMonitor(timeUnit);
         }
     }
 }

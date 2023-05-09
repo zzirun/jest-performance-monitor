@@ -575,6 +575,7 @@ async function handleTimelines() {
         let report = document.createElement("div");
         report.innerHTML = "<b>" + record[testNum].desc + "</b>";
         //Finding timings of timelines
+        const timeUnit = record[testNum].timeUnit;
         const data = record[testNum].timelines;
         const timings = new Map();
         for(timelineNum in data){
@@ -590,13 +591,13 @@ async function handleTimelines() {
         timelineTableRow.style.height = height.toString() + "px";
         let longTimelineCell = document.createElement("td");
         const long = longestTiming(timings);
-        printTimeline("Run with longest timing: " + long.toString() + "ms", data[timings.get(long)].timeline, longTimelineCell, long);
+        printTimeline("Run with longest timing: " + long.toString() + timeUnit, data[timings.get(long)].timeline, longTimelineCell, long, timeUnit);
         let shortTimelineCell = document.createElement("td");
         const short = shortestTiming(timings);
-        printTimeline("Run with shortest timing: " + short.toString() + "ms", data[timings.get(short)].timeline, shortTimelineCell, long);
+        printTimeline("Run with shortest timing: " + short.toString() + timeUnit, data[timings.get(short)].timeline, shortTimelineCell, long, timeUnit);
         let medianTimelineCell = document.createElement("td");
         const median = medianTiming(timings);
-        printTimeline("Run with median timing: " + median.toString() + "ms", data[timings.get(median)].timeline, medianTimelineCell, long);
+        printTimeline("Run with median timing: " + median.toString() + timeUnit, data[timings.get(median)].timeline, medianTimelineCell, long, timeUnit);
         //Appending printed timelines to report
         timelineTableRow.appendChild(longTimelineCell);
         timelineTableRow.appendChild(shortTimelineCell);
@@ -620,7 +621,7 @@ function medianTiming(timings) {
     ];
     return medianTime = times.slice().sort((a, b)=>a - b)[Math.floor(times.length / 2)];
 }
-function printTimeline(title, times, report, long) {
+function printTimeline(title, times, report, long, timeUnit) {
     console.log(times);
     // Creating element
     let chart = document.createElement("canvas");
@@ -693,7 +694,7 @@ function printTimeline(title, times, report, long) {
                 x: {
                     title: {
                         display: true,
-                        text: "estimated duration (ms)"
+                        text: "estimated duration (" + timeUnit + ")"
                     },
                     type: "linear",
                     position: "bottom",

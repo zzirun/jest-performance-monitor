@@ -1,8 +1,9 @@
 const Registrar = require("../index.js");
 const mockAxios = require("axios"); //use prototype of mockaxios to make another one ?? 
 const mockMath = require("mathjs");
-const RuntimeContext = require("../runtimeContext");
-const AsyncMode = require("../asyncModes.js");
+const RuntimeContext = require("../runtimeContext/runtimeContext.js");
+const AsyncMode = require("../runtimeContext/asyncModes.js");
+const TimeUnit = require("../runtimeContext/timeUnits.js")
 const {timelinesProcessor} = require('../runtimeDisplay/timelinesProcessor.js');
 
 /* Mocks & Objects */
@@ -35,7 +36,7 @@ const scalingPerfModel = (run, args) => {
 }
 
 /* Assigning mock implementations and models to mocks */
-const runtimeCtx = new RuntimeContext(AsyncMode.Auto);
+const runtimeCtx = new RuntimeContext(AsyncMode.Auto, TimeUnit.millisecond, 0.1);
 runtimeCtx.mockWithModelAsync(mockAxios.get, "get", scalingPerfModel, getImplementation);
 runtimeCtx.mockWithModelAsync(mockAxios.put, "put", randPerfModel, getImplementation);
 runtimeCtx.mockWithModel(mockMath.add, "add", randPerfModel)
@@ -51,23 +52,23 @@ describe("registrar", () => {
     timelinesProcessor.writeResultsToFile();
   })
 
-  // test("Without perf testing", async () => {
-  //   const result = await registrar.getId(1);
-  //   expect(result).toBe("Zhai Zirun");
-  //   expect(mockAxios.get).toHaveBeenCalledTimes(1);
-  // });
+  test("Without perf testing", async () => {
+    const result = await registrar.getId(1);
+    expect(result).toBe("Zhai Zirun");
+    expect(mockAxios.get).toHaveBeenCalledTimes(1);
+  });
 
-  // test("Sync test code with 1 async mock call", async () => {
-  //   const runs = 6;
-  //   await runtimeCtx.repeat(runs, 
-  //     async () => await registrar.getId(1),
-  //     "Sync test code with 1 async func");
-  //   expect(mockAxios.get).toHaveBeenCalledTimes(runs);
-  //   expect(runtimeCtx.runtimePercentile(50)).toBeLessThan(10);
-  // });
+  test("Sync test code with 1 async mock call", async () => {
+    const runs = 6;
+    await runtimeCtx.repeat(runs, 
+      async () => await registrar.getId(1),
+      "Sync test code with 1 async func");
+    expect(mockAxios.get).toHaveBeenCalledTimes(runs);
+    expect(runtimeCtx.runtimePercentile(50)).toBeLessThan(10);
+  });
 
   test("Sync test code with multiple async mock calls", async () => {
-    const runs = 1;
+    const runs = 6;
     await runtimeCtx.repeat(runs, 
       async () => {
         await registrar.mixedIdCalls();
@@ -78,87 +79,87 @@ describe("registrar", () => {
     expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
   });
 
-  // test("Sync test code with sync and async mocks", async () => {
-  //   const runs = 6;
-  //   await runtimeCtx.repeat(runs, 
-  //     async () => {
-  //       await registrar.serialModifyIds(1);
-  //     },
-  //     "Sync test code with sync and async mocks");
-  //   expect(mockAxios.get).toHaveBeenCalledTimes(runs * 2);
-  //   expect(mockAxios.put).toHaveBeenCalledTimes(runs * 2);
-  //   expect(mockMath.add).toHaveBeenCalledTimes(runs * 2);
-  //   expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
-  // });
+  test("Sync test code with sync and async mocks", async () => {
+    const runs = 6;
+    await runtimeCtx.repeat(runs, 
+      async () => {
+        await registrar.serialModifyIds(1);
+      },
+      "Sync test code with sync and async mocks");
+    expect(mockAxios.get).toHaveBeenCalledTimes(runs * 2);
+    expect(mockAxios.put).toHaveBeenCalledTimes(runs * 2);
+    expect(mockMath.add).toHaveBeenCalledTimes(runs * 2);
+    expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
+  });
 
-  // test("Sync test code with mocks and real time delay", async () => {
-  //   const runs = 6;
-  //   await runtimeCtx.repeat(runs, 
-  //     async () => {
-  //       registrar.addUp(1, 2);
-  //     },
-  //     "Sync test code with mocks and real time delay");
-  //   expect(mockMath.add).toHaveBeenCalledTimes(runs * 2);
-  //   expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
-  // });
+  test("Sync test code with mocks and real time delay", async () => {
+    const runs = 6;
+    await runtimeCtx.repeat(runs, 
+      async () => {
+        registrar.addUp(1, 2);
+      },
+      "Sync test code with mocks and real time delay");
+    expect(mockMath.add).toHaveBeenCalledTimes(runs * 2);
+    expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
+  });
 
-  // test("Async test code with only parallel async mock calls", async () => {
-  //   const runs = 6;
-  //   await runtimeCtx.repeat(runs, 
-  //     async () => {
-  //       await registrar.getIdTogether();
-  //     },
-  //     "Async test code with only parallel async mock calls");
-  //   expect(mockAxios.get).toHaveBeenCalledTimes(runs * 3);
-  //   expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
-  // });
+  test("Async test code with only parallel async mock calls", async () => {
+    const runs = 6;
+    await runtimeCtx.repeat(runs, 
+      async () => {
+        await registrar.getIdTogether();
+      },
+      "Async test code with only parallel async mock calls");
+    expect(mockAxios.get).toHaveBeenCalledTimes(runs * 3);
+    expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
+  });
 
-  // test("Async test code with parallel async calls and a call awaiting all of them", async () => {
-  //   const runs = 6;
-  //   await runtimeCtx.repeat(runs, 
-  //     async () => {
-  //       await registrar.getId(1);
-  //       await registrar.getIdTogether();
-  //       await registrar.getId(1);
-  //     },
-  //     "Async test code with parallel async calls and a call awaiting all of them");
-  //   expect(mockAxios.get).toHaveBeenCalledTimes(runs * 5);
-  //   expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
-  // });
+  test("Async test code with parallel async calls and a call awaiting all of them", async () => {
+    const runs = 6;
+    await runtimeCtx.repeat(runs, 
+      async () => {
+        await registrar.getId(1);
+        await registrar.getIdTogether();
+        await registrar.getId(1);
+      },
+      "Async test code with parallel async calls and a call awaiting all of them");
+    expect(mockAxios.get).toHaveBeenCalledTimes(runs * 5);
+    expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
+  });
 
-  // test("Async test code with parallel async mock calls and a call awaiting one of them", async () => {
-  //   const runs = 1;
-  //   await runtimeCtx.repeat(runs, 
-  //     async () => {
-  //       await registrar.mixedIdCallsAsync();
-  //       //PROBLEMATIC:(
-  //     },
-  //     "Async test code with parallel async mock calls and a call awaiting one of them");
-  //   expect(mockAxios.get).toHaveBeenCalledTimes(runs * 4);
-  //   expect(mockAxios.put).toHaveBeenCalledTimes(runs);
-  //   expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
-  // });
+  test("Async test code with parallel async mock calls and a call awaiting one of them", async () => {
+    const runs = 1;
+    await runtimeCtx.repeat(runs, 
+      async () => {
+        await registrar.mixedIdCallsAsync();
+        //PROBLEMATIC:(
+      },
+      "Async test code with parallel async mock calls and a call awaiting one of them");
+    expect(mockAxios.get).toHaveBeenCalledTimes(runs * 4);
+    expect(mockAxios.put).toHaveBeenCalledTimes(runs);
+    expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
+  });
 
-  // test("Async test code with parallel execution involving real-time delays", async () => {
-  //   const runs = 6;
-  //   await runtimeCtx.repeat(runs, 
-  //     async () => {
-  //       await registrar.getAndDelayedPut(1);
-  //     },
-  //     "Async test code with parallel async calls involving real-time delays");
-  //   expect(mockAxios.get).toHaveBeenCalledTimes(runs * 2);
-  //   expect(mockAxios.put).toHaveBeenCalledTimes(runs);
-  //   expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
-  // });
+  test("Async test code with parallel execution involving real-time delays", async () => {
+    const runs = 6;
+    await runtimeCtx.repeat(runs, 
+      async () => {
+        await registrar.getAndDelayedPut(1);
+      },
+      "Async test code with parallel async calls involving real-time delays");
+    expect(mockAxios.get).toHaveBeenCalledTimes(runs * 2);
+    expect(mockAxios.put).toHaveBeenCalledTimes(runs);
+    expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
+  });
 
-  // test("Async test code with parallel execution involving sync and async mock calls", async () => {
-  //   const runs = 6;
-  //   await runtimeCtx.repeat(runs, 
-  //     ()=>registrar.modifyIds(10),
-  //     "Async test code with parallel execution involving sync and async mock calls");
-  //   expect(mockAxios.get).toHaveBeenCalledTimes(runs * 2);
-  //   expect(mockAxios.put).toHaveBeenCalledTimes(runs);
-  //   expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
-  // });
+  test("Async test code with parallel execution involving sync and async mock calls", async () => {
+    const runs = 6;
+    await runtimeCtx.repeat(runs, 
+      ()=>registrar.modifyIds(10),
+      "Async test code with parallel execution involving sync and async mock calls");
+    expect(mockAxios.get).toHaveBeenCalledTimes(runs * 2);
+    expect(mockAxios.put).toHaveBeenCalledTimes(runs);
+    expect(runtimeCtx.runtimeMean()).toBeLessThan(10);
+  });
 
 });

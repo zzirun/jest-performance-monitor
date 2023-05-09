@@ -13,24 +13,44 @@ function debug(...args) {
 const parents = new Map();
 
 class AutoRuntimeMonitor extends RuntimeMonitor{
-    constructor() {
-        super();  
+    constructor(timeUnit, assumeSerialThreshold) {
+        super(timeUnit);
+        this.assumeSerialThreshold = assumeSerialThreshold ? assumeSerialThreshold : 0.1;
     } 
 
-    getParentEndTime(parentId, currId, sync) {
+    getRealTime(currId) {
+        let time = this.runtimeStopwatch.read();
+        this.realTimes.set(currId, time);
+        return time;
+    }
+
+    getParentEndTime(parentId, currId, realTime, sync) {
         // Finding parent end time
         var parentEndTime = 0;
         if (this.endingTimes.size > 0) {
             if (parentId != currId) {
                 var i = 0;
+                // Looking for most recent parentId with recorded time
                 while (!this.endingTimes.has(parentId) && i < this.maxDependencyLength * 100) {
                     parentId = parents.get(parentId);
-                    debug(parentId)
                     i++;
                 }
-                if (parentId == 0) {
-                    
-                }
+                if (this.visitedParentIds.has(parentId)) {
+                    // parentId has been visited before
+                    // find most recently visited child id 
+                    let recentChildId = parentId
+                    while (this.visitedParentIds.has(recentChildId)) {
+                        recentChildId = this.visitedParentIds.get(recentChildId);
+                    }
+                    // find real time elapsed since that child id 
+                    let recentChildTime = this.realTimes.get(recentChildId);
+                    let timeElapsed = realTime - recentChildTime;
+                    // take that child id as actual parent if threshold of time elapsed is exceeded
+                    if (timeElapsed > this.assumeSerialThreshold) {
+                        parentId = recentChildId;
+                    }
+                } 
+                this.visitedParentIds.set(parentId, currId);
                 parentEndTime = this.endingTimes.get(parentId) ?? 0;
             } else {
                 // if parentId == currId, they are both == 0 (i.e. no stack above it)
@@ -44,12 +64,11 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         return parentEndTime;
     }
 
-    getCurrEndTime(mock, model, parentEndTime, name, sync) {
+    getCurrEndTime(mock, model, realTime, parentEndTime, name, sync) {
         //Calculating timings
         const run = mock.mock.calls.length;
         const args = mock.mock.calls[run - 1];
         const virtualTime = model(run, args);
-        const realTime = this.runtimeStopwatch.read();
 
         debug('Parent End Time: ', parentEndTime,
             '\nTime generated: ', virtualTime,
@@ -88,8 +107,9 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
             '\nCurr id:', currId);
 
         // Finding end time
-        const parentEndTime = this.getParentEndTime(parentId, currId, true);
-        const virtualEndTime = this.getCurrEndTime(mock, model, parentEndTime, name, true);
+        const realTime = this.getRealTime(currId);
+        const parentEndTime = this.getParentEndTime(parentId, currId, realTime, true);
+        const virtualEndTime = this.getCurrEndTime(mock, model, realTime, parentEndTime, name, true);
         this.setMaxEndTime(parentId, virtualEndTime);
 
         debug('New End time for parentId: ', virtualEndTime,
@@ -107,8 +127,9 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
             '\nCurr id:', currId);
 
         // Finding end time
-        const parentEndTime = this.getParentEndTime(parentId, currId);
-        const virtualEndTime = this.getCurrEndTime(mock, model, parentEndTime, name);
+        const realTime = this.getRealTime(currId);
+        const parentEndTime = this.getParentEndTime(parentId, currId, realTime);
+        const virtualEndTime = this.getCurrEndTime(mock, model, realTime, parentEndTime, name);
         this.setMaxEndTime(currId, virtualEndTime);
 
         debug('New End time for currid: ', virtualEndTime,
@@ -126,6 +147,8 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         
         // Setup: Timing info
         this.endingTimes = new Map();
+        this.visitedParentIds = new Map();
+        this.realTimes = new Map();
         this.maxDependencyLength = 0;
 
         this.latestEndTime = 0;

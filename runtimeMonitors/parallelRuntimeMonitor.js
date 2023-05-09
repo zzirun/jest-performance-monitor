@@ -1,8 +1,8 @@
 const RuntimeMonitor = require("./runtimeMonitor");
 
 class ParallelRuntimeMonitor extends RuntimeMonitor{
-    constructor() {
-        super();
+    constructor(timeUnit) {
+        super(timeUnit);
     }
 
     /* Called when mock associated with model is called once */
