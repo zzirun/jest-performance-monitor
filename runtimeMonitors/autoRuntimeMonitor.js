@@ -180,8 +180,12 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
 
         // Recording timing
         let prevRealTime = this.runtimeStopwatch.prevRead();
+        
         this.currTiming += this.runtimeStopwatch.read() - prevRealTime;
         this.currTiming += this.latestEndTime;
+
+        this.timeline.push({name: "real time", start: this.latestEndTime, end: this.currTiming});
+        
         this.runTimings.push(this.currTiming);
         this.totalTiming += this.currTiming;
         this.timelines.push({timing: this.currTiming, timeline: this.timeline});

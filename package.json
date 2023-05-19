@@ -16,6 +16,7 @@
     "chart.js": "^4.3.0",
     "fs": "^0.0.1-security",
     "jest": "^29.4.2",
+    "jest-environment-jsdom": "^29.5.0",
     "mathjs": "^11.8.0",
     "parcel": "^2.8.3",
     "percentile": "^1.6.0",

@@ -1,4 +1,4 @@
-const { timelinesProcessor } = require("../runtimeDisplay/timelinesProcessor.js");
+const { timelinesProcessor } = require("./timelinesProcessor.js");
 
 class RuntimeContext {
     constructor(asyncMode, timeUnit, assumeSerialThreshold) {
@@ -34,7 +34,6 @@ class RuntimeContext {
     // Run tests
 
     async repeat(runs, func, desc) {
-        //todo: use asynclocalstorage to set up one monitor per run
         this.monitoring = true;
         for (let i = 0; i < runs; i++) {
             await this.monitor.handle(func); 
@@ -45,15 +44,6 @@ class RuntimeContext {
         }
         return this;
     }
-
-    // async repeatConcurrently(runs, func) {
-    //     //set up monitors for runs
-    //     promises = []
-    //     for (let i = 0; i < runs; i++) {
-    //         promises.push(this.monitor.handle(func)); 
-    //     }
-    //     return Promise.all(promises);
-    // }
 
     clearContext() {
         this.monitor.resetMonitor();

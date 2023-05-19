@@ -75,16 +75,16 @@ class Registrar {
   }
 
   async mixedIdCalls() {
-    await this.registerId(1);
+    await this.registerId(1); // put
     await this.mixedIdCalls2();
     await this.getId(1);
   }
 
   async mixedIdCalls2() {
-    await this.doubleGetId(2, 1);
-    await this.changeId(1, 2);
-    await this.putAndGetId(2, 1);
-    await this.getId(1);    
+    await this.doubleGetId(2, 1); // 2 serial gets
+    // await this.changeId(1, 2); // get and put
+    // await this.putAndGetId(2, 1); // put and get
+    // await this.getId(1);    
   }
 
   async mixedIdCallsAsync() {
