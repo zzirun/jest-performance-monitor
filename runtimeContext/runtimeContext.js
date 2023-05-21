@@ -4,7 +4,6 @@ class RuntimeContext {
     constructor(asyncMode, timeUnit, assumeSerialThreshold) {
         this.monitoring = false;
         this.timeUnit = timeUnit;
-        console.log(assumeSerialThreshold)
         this.monitor = asyncMode.monitor(timeUnit, assumeSerialThreshold);
     }
 
@@ -35,7 +34,7 @@ class RuntimeContext {
 
     async repeat(runs, func, desc) {
         this.monitoring = true;
-        for (let i = 0; i < runs; i++) {
+        for (let i = 1; i < runs + 1; i++) {
             await this.monitor.handle(func); 
         }
 

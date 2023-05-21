@@ -10,11 +10,12 @@ class TimelinesProcessor {
         this.testsTimelines.push({desc: desc, timelines: timelines, timeUnit: timeUnit.toString()});
     }
 
-    writeResultsToFile() {
+    writeResultsToFile(path) {
         console.log("Writing results to file timelineData");
         console.log(this.testsTimelines);
         let record = JSON.stringify(this.testsTimelines);
-        fs.writeFileSync("../timelineData.txt", record);
+        let fp = path ? path : "../timelineData.txt";
+        fs.writeFileSync(fp, record);
     }
 }
 

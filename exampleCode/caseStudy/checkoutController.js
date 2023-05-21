@@ -1,14 +1,34 @@
 class Controller {
     
-    getQuantities(view) {
+    async getQuantities(view) {
 
     }
 
-    changeQuantity(view, id, change) {
+    async changeQuantity(view, id, change) {
 
     }
 
-    getPrices(view) {
+    async getPrices(view) {
+
+    }
+
+    verifyPaymentInfo(card, expiry, cvv) {
+
+    }
+
+    async chargePayment(amount, card, expiry, cvv) {
+
+    }
+
+    async verifyPaymentWithBank(amount, card, expiry, cvv) {
+
+    }
+
+    async getDeliveryDate() {
+        
+    }
+
+    async emailDeliveryDate(email) {
 
     }
 }

@@ -563,16 +563,15 @@ var _autoDefault = parcelHelpers.interopDefault(_auto);
 var _randomcolor = require("randomcolor");
 var _randomcolorDefault = parcelHelpers.interopDefault(_randomcolor);
 let colours = new Map();
+colours.set("real time", "#b3b3b3");
 async function handleTimelines() {
     addClearButton();
     const fileList = this.files;
     const file = await fileList.item(0).text();
     const record = JSON.parse(file);
-    console.log(record);
     let visualizedTimelines = document.getElementById("visualizedTimelines");
     for(testNum in record){
         // Printing test description
-        console.log(record[testNum]);
         let report = document.createElement("div");
         report.innerHTML = "<b>" + record[testNum].desc + "</b>";
         //Finding timings of timelines
@@ -623,7 +622,6 @@ function medianTiming(timings) {
     return medianTime = times.slice().sort((a, b)=>a - b)[Math.floor(times.length / 2)];
 }
 function printTimeline(title, times, report, long, timeUnit) {
-    console.log(times);
     // Creating element
     let chart = document.createElement("canvas");
     report.appendChild(chart);
@@ -632,7 +630,6 @@ function printTimeline(title, times, report, long, timeUnit) {
     maxY = times.length * 1.3;
     for(i in times){
         let data = times[i];
-        console.log(data);
         //Generating colour
         let randomColors = (0, _randomcolorDefault.default)({
             count: times.length,
@@ -640,6 +637,7 @@ function printTimeline(title, times, report, long, timeUnit) {
         });
         if (!colours.has(data.name)) colours.set(data.name, randomColors[i]);
         let color = colours.get(data.name);
+        console.log(color);
         datasets.push({
             label: data.name,
             backgroundColor: color,
@@ -773,7 +771,7 @@ function addClearButton() {
 const inputElement = document.getElementById("input");
 inputElement.addEventListener("change", handleTimelines, false);
 
-},{"chart.js/auto":"d8NN9","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","randomcolor":"4v9QF"}],"d8NN9":[function(require,module,exports) {
+},{"chart.js/auto":"d8NN9","randomcolor":"4v9QF","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"d8NN9":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _chartJs = require("../dist/chart.js");

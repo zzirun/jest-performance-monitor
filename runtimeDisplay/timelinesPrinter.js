@@ -1,6 +1,7 @@
 import Chart from "chart.js/auto";
 import randomColor from "randomcolor";
 let colours = new Map();
+colours.set("real time", "#b3b3b3")
 
 async function handleTimelines() {
     addClearButton();
@@ -8,13 +9,11 @@ async function handleTimelines() {
     const file = await fileList.item(0).text();
 
     const record = JSON.parse(file);
-    console.log(record);
 
     let visualizedTimelines = document.getElementById("visualizedTimelines");
         
     for (testNum in record) {
         // Printing test description
-        console.log(record[testNum]);
         let report = document.createElement("div");
         report.innerHTML = '<b>' + record[testNum].desc + '</b>';
 
@@ -87,8 +86,6 @@ function medianTiming(timings) {
 }
 
 function printTimeline (title, times, report, long, timeUnit) {
-    console.log(times);
-
     // Creating element
     let chart = document.createElement("canvas");
     report.appendChild(chart);
@@ -100,7 +97,6 @@ function printTimeline (title, times, report, long, timeUnit) {
 
     for (i in times) {
         let data = times[i]
-        console.log(data)
 
         //Generating colour
         let randomColors = randomColor({
@@ -111,7 +107,7 @@ function printTimeline (title, times, report, long, timeUnit) {
             colours.set(data.name, randomColors[i])
         }
         let color = colours.get(data.name)
-        
+        console.log(color)
         datasets.push({
             label: data.name,
             backgroundColor: color,

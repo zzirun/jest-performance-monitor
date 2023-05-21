@@ -3,7 +3,7 @@ const asyncHooks = require('async_hooks');
 const fs = require('fs');
 const util = require('util');
 
-const verbose = true;
+const verbose = false;
 const parents = new Map();
 
 // Utility function for synchronous printing
@@ -105,9 +105,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         this.timeline.push({name: name, start: virtualStartTime, end: currEndTime});
         this.latestEndTime = (currEndTime>this.latestEndTime) ? currEndTime : this.latestEndTime;
 
-        // To be pushed into endingTimes
-        const virtualEndTime = parentEndTime + virtualTime;
-        return virtualEndTime;
+        return currEndTime;
     }
 
     setMaxEndTime(id, time) {
@@ -119,12 +117,13 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
     }
 
     notify(mock, model, name) {
+        debug('\nMock name: ', name);
         this.maxDependencyLength++;
 
         // Finding dependencies
         var parentId = asyncHooks.triggerAsyncId();
         const currId = asyncHooks.executionAsyncId();
-        debug('\nParent id: ', parentId,
+        debug('Parent id: ', parentId,
             '\nCurr id:', currId);
 
         // Finding end time
@@ -139,12 +138,13 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
 
     /* Called when mock associated with model is called once */
     async asyncNotify(mock, model, name) {
+        debug('\nMock name: ', name);
         this.maxDependencyLength++;
 
         // Finding dependencies
         var parentId = asyncHooks.triggerAsyncId();
         const currId = asyncHooks.executionAsyncId();
-        debug('\nParent id: ', parentId,
+        debug('Parent id: ', parentId,
             '\nCurr id:', currId);
 
         // Finding end time
