@@ -11,6 +11,8 @@ const {OrderView, PaymentView} = require("../../exampleCode/caseStudy/checkoutVi
 
 const mockController = require("../../exampleCode/caseStudy/checkoutController.js");
 jest.mock("../../exampleCode/caseStudy/checkoutController.js");
+const mockDocumentEditor = require("../../exampleCode/caseStudy/documentEditor.js");
+jest.mock("../../exampleCode/caseStudy/documentEditor.js");
 
 let orderView = new OrderView();
 
@@ -32,7 +34,7 @@ PRICES.set("100", 10);
 PRICES.set("110", 8);
 
 let TOTAL_PRICE = 140;
-let MODIFIED_TOTAL_PRICE = 224
+let MODIFIED_TOTAL_PRICE = 144
 
 const getQtyImp = () => 
     Promise.resolve(orderView.updateQuantities(QUANTITIES));
@@ -51,7 +53,7 @@ function produceRandPerfModel(max, min) {
     return randPerfModel;
 }
 
-const runtimeCtx = new RuntimeContext(AsyncMode.Auto, TimeUnit.nanosecond, 25000);
+const runtimeCtx = new RuntimeContext(AsyncMode.Auto, TimeUnit.nanosecond, 5000);
 runtimeCtx.mockWithModelAsync(mockController.getQuantities, 
                                 "controller.getQuantities", 
                                 produceRandPerfModel(1500000, 1000000), 
@@ -64,6 +66,13 @@ runtimeCtx.mockWithModelAsync(mockController.changeQuantity,
                                 "controller.changeQuantity",
                                 produceRandPerfModel(4000000, 3000000),
                                 changeQtyImp);
+
+runtimeCtx.mockWithModel(mockDocumentEditor.addQtyToOrderTable,
+                            "documentEditor.addQtyToOrderTable",
+                            produceRandPerfModel(150000, 100000));
+runtimeCtx.mockWithModel(mockDocumentEditor.addPriceToOrderTable,
+                            "documentEditor.addPriceToOrderTable",
+                            produceRandPerfModel(200000, 150000));
 
 const runs = 10; 
 
@@ -92,7 +101,7 @@ describe("order info view", () => {
         expect(mockController.getQuantities).toHaveBeenCalledTimes(runs);
         // should receive and display update from stock model
         expect(orderView.quantities).toBe(QUANTITIES);
-        
+        expect(mockDocumentEditor.addQtyToOrderTable).toHaveBeenCalledTimes(QUANTITIES.size * runs);
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
 
@@ -107,7 +116,7 @@ describe("order info view", () => {
         expect(mockController.getPrices).toHaveBeenCalledTimes(runs);
         // should receive and display update from price model
         expect(orderView.prices).toBe(PRICES);
-        
+        expect(mockDocumentEditor.addPriceToOrderTable).toHaveBeenCalledTimes(QUANTITIES.size * runs);
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
 
@@ -125,6 +134,8 @@ describe("order info view", () => {
         // should receive and display updates from models
         expect(orderView.quantities).toBe(QUANTITIES);
         expect(orderView.prices).toBe(PRICES);
+        expect(mockDocumentEditor.addQtyToOrderTable).toHaveBeenCalledTimes(QUANTITIES.size * runs);
+        expect(mockDocumentEditor.addPriceToOrderTable).toHaveBeenCalledTimes(QUANTITIES.size * runs);
         
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
@@ -230,6 +241,13 @@ runtimeCtx.mockWithModelAsync(mockController.emailDeliveryDate,
     "controller.emailDeliveryDate",
     produceRandPerfModel(4500000, 3500000));
 
+runtimeCtx.mockWithModel(mockDocumentEditor.addPaymentStatus,
+                            "documentEditor.addPaymentStatus",
+                            produceRandPerfModel(150000, 100000));
+runtimeCtx.mockWithModel(mockDocumentEditor.addDeliveryDate,
+                            "documentEditor.addDeliveryDate",
+                            produceRandPerfModel(200000, 150000));
+
 describe("payment view", () => {
     afterEach(() => {
         paymentView = new PaymentView();
@@ -252,6 +270,7 @@ describe("payment view", () => {
         expect(mockController.verifyPaymentInfo).toHaveBeenCalledTimes(runs);
         // should receive and display update
         expect(paymentView.paymentStatus).toBe(PAYMENT_STATUS);
+        expect(mockDocumentEditor.addPaymentStatus).toHaveBeenCalledTimes(runs);
         
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
@@ -267,6 +286,7 @@ describe("payment view", () => {
         expect(mockController.verifyPaymentWithBank).toHaveBeenCalledTimes(0);
         // should receive and display update
         expect(paymentView.paymentStatus).toBe(PAYMENT_STATUS);
+        expect(mockDocumentEditor.addPaymentStatus).toHaveBeenCalledTimes(runs);
         
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
@@ -282,6 +302,7 @@ describe("payment view", () => {
         expect(mockController.verifyPaymentWithBank).toHaveBeenCalledTimes(runs * 2);
         // should receive and display update
         expect(paymentView.paymentStatus).toBe(PAYMENT_STATUS);
+        expect(mockDocumentEditor.addPaymentStatus).toHaveBeenCalledTimes(runs);
         
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
@@ -296,6 +317,7 @@ describe("payment view", () => {
         expect(mockController.emailDeliveryDate).toHaveBeenCalledTimes(runs);
         // should receive and display update
         expect(paymentView.deliveryDate).toBe(DATE);
+        expect(mockDocumentEditor.addDeliveryDate).toHaveBeenCalledTimes(runs);
         
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
@@ -314,6 +336,7 @@ describe("payment view", () => {
         expect(mockController.emailDeliveryDate).toHaveBeenCalledTimes(0);
         // should receive and display update
         expect(paymentView.paymentStatus).toBe(PAYMENT_STATUS);
+        expect(mockDocumentEditor.addPaymentStatus).toHaveBeenCalledTimes(runs);
         
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
@@ -333,6 +356,7 @@ describe("payment view", () => {
         expect(mockController.emailDeliveryDate).toHaveBeenCalledTimes(0);
         // should receive and display update
         expect(paymentView.paymentStatus).toBe(PAYMENT_STATUS);
+        expect(mockDocumentEditor.addPaymentStatus).toHaveBeenCalledTimes(runs * 2);
         
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
@@ -352,7 +376,9 @@ describe("payment view", () => {
         expect(mockController.emailDeliveryDate).toHaveBeenCalledTimes(runs);
         // should receive and display update
         expect(paymentView.paymentStatus).toBe(PAYMENT_STATUS);
+        expect(mockDocumentEditor.addPaymentStatus).toHaveBeenCalledTimes(runs);
         expect(paymentView.deliveryDate).toBe(DATE);
+        expect(mockDocumentEditor.addDeliveryDate).toHaveBeenCalledTimes(runs);
         
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });
@@ -372,7 +398,9 @@ describe("payment view", () => {
         expect(mockController.emailDeliveryDate).toHaveBeenCalledTimes(runs);
         // should receive and display update
         expect(paymentView.paymentStatus).toBe(PAYMENT_STATUS);
+        expect(mockDocumentEditor.addPaymentStatus).toHaveBeenCalledTimes(runs);
         expect(paymentView.deliveryDate).toBe(DATE);
+        expect(mockDocumentEditor.addDeliveryDate).toHaveBeenCalledTimes(runs);
         
         expect(runtimeCtx.runtimeMean()).toBeLessThan(1000000);
     });

@@ -1,10 +1,11 @@
 const controller = require("./checkoutController.js");
+const documentEditor = require("./documentEditor.js");
 
 class OrderView {
 
     constructor() {
-        this.orderTable = document.createElement("table");
-        this.rows = new Map();
+        documentEditor.createOrderTable();
+        // this.rows = new Map();
         this.quantities = new Map();
         this.prices = new Map();
     }
@@ -31,37 +32,18 @@ class OrderView {
 
     updateQuantities(quantities) {
         this.quantities = quantities;
-        this.rows = new Map();
-        this.orderTable.replaceChildren();
+        // this.rows = new Map();
+        documentEditor.clearOrderTable();
         for (let [id, info] of quantities) {
-            let row = document.createElement("tr");
-            this.rows.set(id, row);
-
-            let idCell = document.createElement("td");
-            idCell.innerText = id;
-            row.appendChild(idCell);
-
-            let nameCell = document.createElement("td");
-            nameCell.innerText = info.name;
-            row.appendChild(nameCell);
-
-            let qtyCell = document.createElement("td");
-            qtyCell.innerText = info.qty;
-            row.appendChild(qtyCell);
-
-            this.orderTable.appendChild(row);
+            documentEditor.addQtyToOrderTable(id, info);
         }
     }
 
     updatePrices(prices) {
         this.prices = prices;
-        
         for (let [id, price] of prices) {
             if (this.quantities.has(id)) {
-                let row = this.rows.get(id);
-                let priceCell = document.createElement("td");
-                priceCell.innerText = price;
-                row.appendChild(priceCell);
+                documentEditor.addPriceToOrderTable(id, price);
             }
         }
     }
@@ -70,7 +52,7 @@ class OrderView {
 
 class PaymentView {
     constructor() {
-        this.paymentView = document.createElement("div");
+        documentEditor.createPaymentDiv();
     }
 
     async processPayment(amount, card, expiry, cvv, email, bankVerification) {
@@ -137,16 +119,12 @@ class PaymentView {
 
     updatePaymentStatus(status, message) {
         this.paymentStatus = status;
-        let confirmation = document.createElement("div");
-        confirmation.innerText = message;
-        this.paymentView.appendChild(confirmation);
+        documentEditor.addPaymentStatus(message);
     }
 
     updateDeliveryDate(date) {
         this.deliveryDate = date;
-        let delivery = document.createElement("div");
-        delivery.innerText = "Delivery date: " + date;
-        this.paymentView.appendChild(delivery);
+        documentEditor.addDeliveryDate(date);
     }
 
 }

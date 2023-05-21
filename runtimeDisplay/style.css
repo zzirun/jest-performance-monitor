@@ -4,3 +4,7 @@ body {
     color: #2d2d2d
 }
 
+ul {
+    flex-wrap: wrap;
+    row-gap: 10px;
+}

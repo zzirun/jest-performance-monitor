@@ -11,8 +11,7 @@ class TimelinesProcessor {
     }
 
     writeResultsToFile(path) {
-        console.log("Writing results to file timelineData");
-        console.log(this.testsTimelines);
+        console.log("Writing results to file " + path);
         let record = JSON.stringify(this.testsTimelines);
         let fp = path ? path : "../timelineData.txt";
         fs.writeFileSync(fp, record);

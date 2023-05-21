@@ -718,6 +718,7 @@ function printLegend() {
     legendContainer.innerHTML = "<b>Legend:</b>";
     legendContainer.style.display = "flex";
     legendContainer.style.flexDirection = "row";
+    // legendContainer.style.setAttribute("flex-wrap", "wrap");
     legendContainer.style.margin = 0;
     legendContainer.style.padding = 0;
     for (let [name, colour] of colours.entries()){
@@ -756,6 +757,7 @@ function clearTimelines() {
     const legendContainer = document.getElementById("legend");
     legendContainer.replaceChildren();
     colours = new Map();
+    colours.set("real time", "#b3b3b3");
     document.getElementById("clearButton").remove();
 }
 function addClearButton() {

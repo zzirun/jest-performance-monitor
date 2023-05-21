@@ -1,7 +1,7 @@
 import Chart from "chart.js/auto";
 import randomColor from "randomcolor";
 let colours = new Map();
-colours.set("real time", "#b3b3b3")
+colours.set("real time", "#b3b3b3");
 
 async function handleTimelines() {
     addClearButton();
@@ -184,6 +184,7 @@ function printLegend() {
     legendContainer.innerHTML = '<b>Legend:</b>'
     legendContainer.style.display = 'flex';
     legendContainer.style.flexDirection = 'row';
+    // legendContainer.style.setAttribute("flex-wrap", "wrap");
     legendContainer.style.margin = 0;
     legendContainer.style.padding = 0;
 
@@ -230,6 +231,7 @@ function clearTimelines() {
     const legendContainer = document.getElementById("legend");
     legendContainer.replaceChildren();
     colours = new Map();
+    colours.set("real time", "#b3b3b3");
 
     document.getElementById("clearButton").remove();
 }

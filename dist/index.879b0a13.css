@@ -4,4 +4,9 @@ body {
   font-size: 13px;
 }
 
+ul {
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
 /*# sourceMappingURL=index.879b0a13.css.map */

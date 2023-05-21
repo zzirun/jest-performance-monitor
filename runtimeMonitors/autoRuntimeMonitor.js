@@ -3,8 +3,11 @@ const asyncHooks = require('async_hooks');
 const fs = require('fs');
 const util = require('util');
 
-const verbose = false;
+let verbose = false;
 const parents = new Map();
+
+const setVerbose = () => verbose = true;
+const setSilent = () => verbose = false;
 
 // Utility function for synchronous printing
 // Since console.log is an async op, calling it causes AsyncHook callbacks to be created
@@ -131,6 +134,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         const parentEndTime = this.getParentEndTime(parentId, currId, realTime, true);
         const virtualEndTime = this.getCurrEndTime(mock, model, realTime, parentEndTime, name, true);
         this.setMaxEndTime(parentId, virtualEndTime);
+        this.setMaxEndTime(currId, virtualEndTime);
 
         debug('New End time for parentId: ', virtualEndTime,
             '\nUpdated latest End time: ', this.latestEndTime);
@@ -157,7 +161,10 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
             '\nUpdated latest End time: ', this.latestEndTime);
     }
 
-    async handle(func) {
+    async handle(func, verbose) {
+        if(verbose) {
+            setVerbose();
+        }
         // Setup: Async hook
         function init(asyncId, type, triggerAsyncId, resource) {
             parents.set(asyncId, triggerAsyncId);
@@ -195,7 +202,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         // Cleanup
         this.resetCurrRun();
         asyncHook.disable();
-        
+        setSilent();
     }
 }
 

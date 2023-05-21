@@ -32,10 +32,10 @@ class RuntimeContext {
     }
     // Run tests
 
-    async repeat(runs, func, desc) {
+    async repeat(runs, func, desc, verbose) {
         this.monitoring = true;
         for (let i = 1; i < runs + 1; i++) {
-            await this.monitor.handle(func); 
+            await this.monitor.handle(func, verbose); 
         }
 
         if (desc) {
