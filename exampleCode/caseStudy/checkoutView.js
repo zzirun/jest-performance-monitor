@@ -129,8 +129,4 @@ class PaymentView {
 
 }
 
-let orderView = new OrderView();
-orderView.renderQuantities();
-orderView.renderPrices();
-let paymentView = new PaymentView();
-module.exports = {OrderView, PaymentView, orderView, paymentView}
+module.exports = {OrderView, PaymentView}
