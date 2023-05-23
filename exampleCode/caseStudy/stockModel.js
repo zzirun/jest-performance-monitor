@@ -8,11 +8,17 @@ let MODIFIED_QUANTITIES = new Map();
 MODIFIED_QUANTITIES.set("1", {name: "A Tale of Two Cities", qty: "4"});
 MODIFIED_QUANTITIES.set("110", {name: "Maurice", qty: "14"});
 
-const {order} = require("../caseStudy/checkoutView.js");
+let PRICES = new Map();
+PRICES.set("1", 8);
+PRICES.set("5", 13);
+PRICES.set("10", 9);
+PRICES.set("100", 10);
+PRICES.set("110", 8);
+const {OrderView, PaymentView, orderView, paymentView} = require("../caseStudy/checkoutView.js");
 
 class StockModel {
-    async getQuantities() {
-        return order.updateQuantities(QUANTITIES);
+    async getQuantities(view) {
+        return view.updateQuantities(QUANTITIES);
     }
 
     async changeQuantity(id, change) {
@@ -21,8 +27,8 @@ class StockModel {
         QUANTITIES.set(id, {name: oldInfo.name, qty: "" + newQty});
     }
 
-    async getPrices() {
-        return order.updatePrices(PRICES);
+    async getPrices(view) {
+        return view.updatePrices(PRICES);
     }
 }
 

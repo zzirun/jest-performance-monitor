@@ -3,32 +3,32 @@ const { paymentModel } = require("./paymentModel.js");
 
 class Controller {
     
-    async getQuantities() {
-        return await stockModel.getQuantities();
+    async getQuantities(view) {
+        return await stockModel.getQuantities(view);
     }
 
     async changeQuantity(id, change) {
         return await stockModel.changeQuantity(id, change);
     }
 
-    async getPrices() {
-        return await stockModel.getPrices();
+    async getPrices(view) {
+        return await stockModel.getPrices(view);
     }
 
-    verifyPaymentInfo(card, expiry, cvv) {
-        return paymentModel.verifyPaymentInfo(card, expiry, cvv);
+    verifyPaymentInfo(view, card, expiry, cvv) {
+        return paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
     }
 
-    async chargePayment(amount, card, expiry, cvv) {
-        return await paymentModel.chargePayment(amount, card, expiry, cvv);
+    async chargePayment(view, amount, card, expiry, cvv) {
+        return await paymentModel.chargePayment(view, amount, card, expiry, cvv);
     }
 
-    async verifyPaymentWithBank(amount, card, expiry, cvv) {
-        return await paymentModel.verifyPaymentWithBank(amount, card, expiry, cvv);
+    async verifyPaymentWithBank(view, amount, card, expiry, cvv) {
+        return await paymentModel.verifyPaymentWithBank(view, amount, card, expiry, cvv);
     }
 
-    async getDeliveryDate() {
-        return await paymentModel.getDeliveryDate();
+    async getDeliveryDate(view) {
+        return await paymentModel.getDeliveryDate(view);
     }
 
     async emailDeliveryDate(email) {

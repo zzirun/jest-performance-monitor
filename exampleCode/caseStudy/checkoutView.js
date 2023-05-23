@@ -75,7 +75,7 @@ class PaymentView {
         let syntaxCorrect = this.syntaxCheck(card, expiry, cvv);
         if (syntaxCorrect) {
             let encryptedCard = this.encryptCardInfo();
-            return controller.verifyPaymentInfo(encryptedCard, expiry, cvv);
+            return controller.verifyPaymentInfo(this, encryptedCard, expiry, cvv);
         } else {
             this.updatePaymentStatus(0, "Payment method invalid!");
             return false;
@@ -99,20 +99,20 @@ class PaymentView {
 
     async chargePayment(amount, card, expiry, cvv) {
         let encryptedCard = this.encryptCardInfo(card);
-        return await controller.chargePayment(amount, encryptedCard, expiry, cvv);
+        return await controller.chargePayment(this, amount, encryptedCard, expiry, cvv);
     }
 
     async chargePaymentWithBankVerification(amount, card, expiry, cvv) {
-        let firstVerification = await controller.verifyPaymentWithBank(amount, card, expiry, cvv);
-        let secondVerification = await controller.verifyPaymentWithBank(amount, card, expiry, cvv);
+        let firstVerification = await controller.verifyPaymentWithBank(this, amount, card, expiry, cvv);
+        let secondVerification = await controller.verifyPaymentWithBank(this, amount, card, expiry, cvv);
         if (firstVerification && secondVerification) {
-            return await controller.chargePayment(amount, card, expiry, cvv);
+            return await controller.chargePayment(this, amount, card, expiry, cvv);
         }
         return false;
     }
 
     async getDeliveryDate(email) {
-        let displayed = controller.getDeliveryDate();
+        let displayed = controller.getDeliveryDate(this);
         let emailed = controller.emailDeliveryDate(email);
         return Promise.allSettled([displayed, emailed]);
     }
@@ -129,4 +129,8 @@ class PaymentView {
 
 }
 
-module.exports = {OrderView, PaymentView}
+let orderView = new OrderView();
+orderView.renderQuantities();
+orderView.renderPrices();
+let paymentView = new PaymentView();
+module.exports = {OrderView, PaymentView, orderView, paymentView}
