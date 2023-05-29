@@ -4,7 +4,7 @@ const documentEditor = require("./documentEditor.js");
 class OrderView {
 
     constructor() {
-        documentEditor.createOrderTable();
+        documentEditor.createOrderTable(this);
         // this.rows = new Map();
         this.quantities = new Map();
         this.prices = new Map();
@@ -15,7 +15,7 @@ class OrderView {
     }
 
     async changeQuantity(id, change) {
-        return controller.changeQuantity(this, id, change);
+        return controller.changeQuantity(id, change);
     }
 
     async renderPrices() {
@@ -28,6 +28,7 @@ class OrderView {
             let currSum = parseInt(info.qty) * this.prices.get(id);
             this.totalPrice += currSum;
         }
+        documentEditor.addTotalPrice(this.totalPrice);
     }
 
     updateQuantities(quantities) {
@@ -52,7 +53,7 @@ class OrderView {
 
 class PaymentView {
     constructor() {
-        documentEditor.createPaymentDiv();
+        documentEditor.createPaymentDiv(this);
     }
 
     async processPayment(amount, card, expiry, cvv, email, bankVerification) {

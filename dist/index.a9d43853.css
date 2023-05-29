@@ -1,0 +1,16 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#orderTable {
+  border-collapse: collapse;
+  width: 50%;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#orderTable td, #customers th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+/*# sourceMappingURL=index.a9d43853.css.map */

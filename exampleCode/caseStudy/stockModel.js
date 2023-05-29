@@ -14,7 +14,6 @@ PRICES.set("5", 13);
 PRICES.set("10", 9);
 PRICES.set("100", 10);
 PRICES.set("110", 8);
-const {OrderView, PaymentView, orderView, paymentView} = require("../caseStudy/checkoutView.js");
 
 class StockModel {
     async getQuantities(view) {
@@ -22,9 +21,13 @@ class StockModel {
     }
 
     async changeQuantity(id, change) {
+        console.log(QUANTITIES);
+        console.log(id)
         const oldInfo = QUANTITIES.get(id);
-        const newQty = parseInt(oldInfo.qty) + parseInt(change);
-        QUANTITIES.set(id, {name: oldInfo.name, qty: "" + newQty});
+        console.log(oldInfo);
+        const newQty = parseInt(oldInfo.qty ?? "0") + parseInt(change);
+        console.log(newQty)
+        QUANTITIES.set(id, {name: oldInfo.name, qty: newQty.toString()});
     }
 
     async getPrices(view) {

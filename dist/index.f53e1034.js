@@ -561,6 +561,7 @@ const { OrderView , PaymentView  } = require("a81f4ed0c4090467");
 let orderView = new OrderView();
 orderView.renderQuantities();
 orderView.renderPrices();
+orderView.renderTotalPrice();
 let paymentView = new PaymentView();
 
 },{"a81f4ed0c4090467":"llPCs"}],"llPCs":[function(require,module,exports) {
@@ -568,7 +569,7 @@ const controller = require("8bab40618d0f3261");
 const documentEditor = require("8e175fe8e0f984e");
 class OrderView {
     constructor(){
-        documentEditor.createOrderTable();
+        documentEditor.createOrderTable(this);
         // this.rows = new Map();
         this.quantities = new Map();
         this.prices = new Map();
@@ -577,7 +578,7 @@ class OrderView {
         return controller.getQuantities(this);
     }
     async changeQuantity(id, change) {
-        return controller.changeQuantity(this, id, change);
+        return controller.changeQuantity(id, change);
     }
     async renderPrices() {
         return controller.getPrices(this);
@@ -588,6 +589,7 @@ class OrderView {
             let currSum = parseInt(info.qty) * this.prices.get(id);
             this.totalPrice += currSum;
         }
+        documentEditor.addTotalPrice(this.totalPrice);
     }
     updateQuantities(quantities) {
         this.quantities = quantities;
@@ -602,7 +604,7 @@ class OrderView {
 }
 class PaymentView {
     constructor(){
-        documentEditor.createPaymentDiv();
+        documentEditor.createPaymentDiv(this);
     }
     async processPayment(amount, card, expiry, cvv, email, bankVerification) {
         let validPaymentInfo = await this.checkPaymentInfo(card, expiry, cvv);
@@ -735,17 +737,20 @@ PRICES.set("5", 13);
 PRICES.set("10", 9);
 PRICES.set("100", 10);
 PRICES.set("110", 8);
-const { OrderView , PaymentView , orderView , paymentView  } = require("2b044e223957861e");
 class StockModel {
     async getQuantities(view) {
         return view.updateQuantities(QUANTITIES);
     }
     async changeQuantity(id, change) {
+        console.log(QUANTITIES);
+        console.log(id);
         const oldInfo = QUANTITIES.get(id);
-        const newQty = parseInt(oldInfo.qty) + parseInt(change);
+        console.log(oldInfo);
+        const newQty = parseInt(oldInfo.qty ?? "0") + parseInt(change);
+        console.log(newQty);
         QUANTITIES.set(id, {
             name: oldInfo.name,
-            qty: "" + newQty
+            qty: newQty.toString()
         });
     }
     async getPrices(view) {
@@ -757,7 +762,7 @@ module.exports = {
     stockModel
 };
 
-},{"2b044e223957861e":"llPCs"}],"94Ex8":[function(require,module,exports) {
+},{}],"94Ex8":[function(require,module,exports) {
 //dummy values
 let PAYMENT_STATUS = 0;
 class PaymentModel {
@@ -788,10 +793,13 @@ module.exports = {
 };
 
 },{}],"2Idh1":[function(require,module,exports) {
-const { orderView , paymentView  } = require("24f97c702c129b72");
+const { OrderView , PaymentView  } = require("24f97c702c129b72");
 let BANK_VERIFICATION = true;
+let orderView = null;
+let paymentView = null;
 function submitPayment(event) {
     event.preventDefault();
+    console.log("Paying...");
     let card = document.getElementById("card").value;
     let exp = document.getElementById("exp").value;
     let cvv = document.getElementById("cvv").cvv;
@@ -801,18 +809,23 @@ function submitQtyChange(event) {
     event.preventDefault();
     let id = document.getElementById("id").value;
     let change = document.getElementById("change").value;
+    console.log("Changing... " + id + change);
     orderView.changeQuantity(id, change);
     orderView.renderQuantities();
+    orderView.renderPrices();
     orderView.renderTotalPrice();
 }
 class DocumentEditor {
     constructor(){
         this.rows = new Map();
     }
-    createOrderTable() {
+    createOrderTable(view) {
+        orderView = view;
         this.orderTable = document.createElement("table");
+        this.orderTable.id = "orderTable";
         let order = document.getElementById("order");
         order.appendChild(this.orderTable);
+        this.addOrderHeaders();
         let changeForm = document.createElement("form");
         let id = document.createElement("input");
         id.id = "id";
@@ -827,14 +840,31 @@ class DocumentEditor {
         change.setAttribute("placeholder", "Change");
         changeForm.appendChild(change);
         var s = document.createElement("input");
-        s.setAttribute("type", "Submit Change");
+        s.setAttribute("type", "submit");
         s.setAttribute("value", "Submit Change");
-        s.addEventListener("submit", submitQtyChange);
         changeForm.appendChild(s);
+        changeForm.addEventListener("submit", submitQtyChange);
         order.appendChild(changeForm);
+    }
+    addOrderHeaders() {
+        let headerRow = document.createElement("tr");
+        let idHeader = document.createElement("th");
+        idHeader.innerText = "Book id";
+        headerRow.appendChild(idHeader);
+        let nameHeader = document.createElement("th");
+        nameHeader.innerText = "Title";
+        headerRow.appendChild(nameHeader);
+        let qtyHeader = document.createElement("th");
+        qtyHeader.innerText = "Quantity";
+        headerRow.appendChild(qtyHeader);
+        let priceHeader = document.createElement("th");
+        priceHeader.innerText = "Price per book";
+        headerRow.appendChild(priceHeader);
+        this.orderTable.appendChild(headerRow);
     }
     clearOrderTable() {
         this.orderTable.replaceChildren();
+        this.addOrderHeaders();
     }
     addQtyToOrderTable(id, info) {
         let row = document.createElement("tr");
@@ -858,10 +888,12 @@ class DocumentEditor {
     }
     addTotalPrice(totalPrice) {
         this.totalPrice = totalPrice;
-        let totalPriceInfo = document.createElement("div");
+        let totalPriceInfo = document.getElementById("total price");
+        totalPriceInfo.replaceChildren();
         totalPriceInfo.innerHTML = "Total price: " + totalPrice;
     }
-    createPaymentDiv() {
+    createPaymentDiv(view) {
+        paymentView = view;
         this.paymentView = document.createElement("div");
         this.paymentView.innerText = "Enter Card Details:";
         let form = document.createElement("form");
@@ -884,10 +916,10 @@ class DocumentEditor {
         cvv.setAttribute("placeholder", "CVV");
         form.appendChild(cvv);
         var s = document.createElement("input");
-        s.setAttribute("type", "Pay");
+        s.setAttribute("type", "submit");
         s.setAttribute("value", "Pay");
-        s.addEventListener("submit", submitPayment);
         form.appendChild(s);
+        form.addEventListener("submit", submitPayment);
         this.paymentView.appendChild(form);
         let payment = document.getElementById("payment");
         payment.appendChild(this.paymentView);
