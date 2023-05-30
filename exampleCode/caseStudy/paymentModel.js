@@ -1,6 +1,6 @@
 //dummy values
-
-let PAYMENT_STATUS = 0;
+let DATE = "3/3/23";
+let PAYMENT_STATUS = 2;
 
 class PaymentModel {
     verifyPaymentInfo(view, card, expiry, cvv) {
@@ -27,7 +27,9 @@ class PaymentModel {
     }
 
     async getDeliveryDate(view) {
-        return view.updateDeliveryDate(DATE);
+        view.updateDeliveryDate(DATE);
+        return true;
+        // return Promise.resolve(view.updateDeliveryDate(DATE));
     }
 
     async emailDeliveryDate(email) {

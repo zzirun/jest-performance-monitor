@@ -11,7 +11,8 @@ function submitPayment(event) {
     console.log("Paying...")
     let card = document.getElementById("card").value;
     let exp = document.getElementById("exp").value;
-    let cvv = document.getElementById("cvv").cvv;
+    let cvv = document.getElementById("cvv").value;
+    console.log(cvv)
     paymentView.processPayment(this.totalPrice, card, exp, cvv, "", BANK_VERIFICATION);
 }
 

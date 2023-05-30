@@ -570,7 +570,6 @@ const documentEditor = require("8e175fe8e0f984e");
 class OrderView {
     constructor(){
         documentEditor.createOrderTable(this);
-        // this.rows = new Map();
         this.quantities = new Map();
         this.prices = new Map();
     }
@@ -593,7 +592,6 @@ class OrderView {
     }
     updateQuantities(quantities) {
         this.quantities = quantities;
-        // this.rows = new Map();
         documentEditor.clearOrderTable();
         for (let [id, info] of quantities)documentEditor.addQtyToOrderTable(id, info);
     }
@@ -607,6 +605,7 @@ class PaymentView {
         documentEditor.createPaymentDiv(this);
     }
     async processPayment(amount, card, expiry, cvv, email, bankVerification) {
+        console.log(cvv);
         let validPaymentInfo = await this.checkPaymentInfo(card, expiry, cvv);
         if (validPaymentInfo) {
             if (bankVerification) {
@@ -623,6 +622,7 @@ class PaymentView {
         }
     }
     async checkPaymentInfo(card, expiry, cvv) {
+        console.log(cvv);
         let syntaxCorrect = this.syntaxCheck(card, expiry, cvv);
         if (syntaxCorrect) {
             let encryptedCard = this.encryptCardInfo();
@@ -633,6 +633,7 @@ class PaymentView {
         }
     }
     syntaxCheck(card, expiry, cvv) {
+        console.log(cvv.length);
         let cardLen = card.length == 16;
         let expiryLen = expiry.length == 4;
         let cvvLen = cvv.length == 3;
@@ -764,7 +765,8 @@ module.exports = {
 
 },{}],"94Ex8":[function(require,module,exports) {
 //dummy values
-let PAYMENT_STATUS = 0;
+let DATE = "3/3/23";
+let PAYMENT_STATUS = 2;
 class PaymentModel {
     verifyPaymentInfo(view, card, expiry, cvv) {
         if (PAYMENT_STATUS == 0) {
@@ -783,7 +785,9 @@ class PaymentModel {
         } else return true;
     }
     async getDeliveryDate(view) {
-        return view.updateDeliveryDate(DATE);
+        view.updateDeliveryDate(DATE);
+        return true;
+    // return Promise.resolve(view.updateDeliveryDate(DATE));
     }
     async emailDeliveryDate(email) {}
 }
@@ -802,7 +806,8 @@ function submitPayment(event) {
     console.log("Paying...");
     let card = document.getElementById("card").value;
     let exp = document.getElementById("exp").value;
-    let cvv = document.getElementById("cvv").cvv;
+    let cvv = document.getElementById("cvv").value;
+    console.log(cvv);
     paymentView.processPayment(this.totalPrice, card, exp, cvv, "", BANK_VERIFICATION);
 }
 function submitQtyChange(event) {

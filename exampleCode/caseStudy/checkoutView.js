@@ -5,7 +5,6 @@ class OrderView {
 
     constructor() {
         documentEditor.createOrderTable(this);
-        // this.rows = new Map();
         this.quantities = new Map();
         this.prices = new Map();
     }
@@ -33,7 +32,6 @@ class OrderView {
 
     updateQuantities(quantities) {
         this.quantities = quantities;
-        // this.rows = new Map();
         documentEditor.clearOrderTable();
         for (let [id, info] of quantities) {
             documentEditor.addQtyToOrderTable(id, info);
@@ -57,6 +55,7 @@ class PaymentView {
     }
 
     async processPayment(amount, card, expiry, cvv, email, bankVerification) {
+        console.log(cvv)
         let validPaymentInfo = await this.checkPaymentInfo(card, expiry, cvv);
         if (validPaymentInfo) {
             if (bankVerification) {
@@ -73,6 +72,7 @@ class PaymentView {
     }
 
     async checkPaymentInfo(card, expiry, cvv) {
+        console.log(cvv)
         let syntaxCorrect = this.syntaxCheck(card, expiry, cvv);
         if (syntaxCorrect) {
             let encryptedCard = this.encryptCardInfo();
@@ -84,6 +84,7 @@ class PaymentView {
     }
 
     syntaxCheck(card, expiry, cvv) {
+        console.log(cvv.length)
         let cardLen = card.length == 16;
         let expiryLen = expiry.length == 4;
         let cvvLen = cvv.length == 3;
