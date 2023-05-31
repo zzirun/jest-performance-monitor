@@ -7,6 +7,7 @@ class OrderView {
         documentEditor.createOrderTable(this);
         this.quantities = new Map();
         this.prices = new Map();
+        this.pricesAdded = false;
     }
 
     async renderQuantities() {
@@ -21,6 +22,13 @@ class OrderView {
         return controller.getPrices(this);
     }
 
+    async startingRender() {
+        let quantities = this.renderQuantities();
+        let prices = this.renderPrices();
+        await Promise.allSettled([quantities, prices]);
+        this.renderTotalPrice();
+    }
+
     renderTotalPrice() {
         this.totalPrice = 0;
         for (let [id, info] of this.quantities) {
@@ -33,15 +41,21 @@ class OrderView {
     updateQuantities(quantities) {
         this.quantities = quantities;
         documentEditor.clearOrderTable();
+        console.log("Updating quantities");
         for (let [id, info] of quantities) {
             documentEditor.addQtyToOrderTable(id, info);
+            if (this.prices.has(id) && !this.pricesAdded) {
+                documentEditor.addPriceToOrderTable(id, this.prices.get(id));
+            }
         }
     }
 
     updatePrices(prices) {
         this.prices = prices;
+        console.log("Updating prices");
         for (let [id, price] of prices) {
             if (this.quantities.has(id)) {
+                this.pricesAdded = true;
                 documentEditor.addPriceToOrderTable(id, price);
             }
         }

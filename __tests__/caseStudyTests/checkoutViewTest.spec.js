@@ -121,7 +121,7 @@ describe("order info view", () => {
     });
 
     // Parallel async mock calls
-    it("should render book quantities and prices independently", async () => {
+    it("should get book quantities and prices independently", async () => {
         await runtimeCtx.repeat(runs, async () => {
             let qty = orderView.renderQuantities();
             let price = orderView.renderPrices();

@@ -16,13 +16,14 @@ function submitPayment(event) {
     paymentView.processPayment(this.totalPrice, card, exp, cvv, "", BANK_VERIFICATION);
 }
 
-function submitQtyChange(event) {
+async function submitQtyChange(event) {
     event.preventDefault();
     let id = document.getElementById("id").value;
     let change = document.getElementById("change").value;
     console.log("Changing... " + id + change);
-    orderView.changeQuantity(id, change);
-    orderView.renderQuantities();
+    await orderView.changeQuantity(id, change);
+    // documentEditor.clearOrderTable();
+    await orderView.renderQuantities();
     orderView.renderPrices();
     orderView.renderTotalPrice();
 }
