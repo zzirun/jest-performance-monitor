@@ -221,7 +221,7 @@ const getDeliveryDateImp = () =>
     Promise.resolve(paymentView.updateDeliveryDate(DATE));
 
 
-runtimeCtx.mockWithModel(mockController.verifyPaymentInfo, 
+runtimeCtx.mockWithModelAsync(mockController.verifyPaymentInfo, 
     "controller.verifyPaymentInfo", 
     produceRandPerfModel(8000000, 7000000), 
     verifyPaymentImp);

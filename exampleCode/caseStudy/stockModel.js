@@ -1,9 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
+const supabase = require('@supabase/supabase-js')
 
 class StockModel {
 
     constructor() {
-        this.supabase = createClient('https://ohmidvwmuxmfxouxiekr.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obWlkdndtdXhtZnhvdXhpZWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODU0NzkxNjIsImV4cCI6MjAwMTA1NTE2Mn0.-usktHgBo9kmeDKTugyatBelOXlds5I4wFNhhiNRi_Y')
+        this.supabase = supabase.createClient('https://ohmidvwmuxmfxouxiekr.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obWlkdndtdXhtZnhvdXhpZWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODU0NzkxNjIsImV4cCI6MjAwMTA1NTE2Mn0.-usktHgBo9kmeDKTugyatBelOXlds5I4wFNhhiNRi_Y')
     }
 
     async getQuantities(view) {

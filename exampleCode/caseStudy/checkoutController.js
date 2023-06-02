@@ -15,8 +15,8 @@ class Controller {
         return await stockModel.getPrices(view);
     }
 
-    verifyPaymentInfo(view, card, expiry, cvv) {
-        return paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
+    async verifyPaymentInfo(view, card, expiry, cvv) {
+        return await paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
     }
 
     async chargePayment(view, amount, card, expiry, cvv) {

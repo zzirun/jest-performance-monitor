@@ -90,7 +90,7 @@ class PaymentView {
         let syntaxCorrect = this.syntaxCheck(card, expiry, cvv);
         if (syntaxCorrect) {
             let encryptedCard = this.encryptCardInfo();
-            return controller.verifyPaymentInfo(this, encryptedCard, expiry, cvv);
+            return await controller.verifyPaymentInfo(this, encryptedCard, expiry, cvv);
         } else {
             this.updatePaymentStatus(0, "Payment method invalid!");
             return false;

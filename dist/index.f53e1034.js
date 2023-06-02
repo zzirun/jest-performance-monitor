@@ -642,7 +642,7 @@ class PaymentView {
         let syntaxCorrect = this.syntaxCheck(card, expiry, cvv);
         if (syntaxCorrect) {
             let encryptedCard = this.encryptCardInfo();
-            return controller.verifyPaymentInfo(this, encryptedCard, expiry, cvv);
+            return await controller.verifyPaymentInfo(this, encryptedCard, expiry, cvv);
         } else {
             this.updatePaymentStatus(0, "Payment method invalid!");
             return false;
@@ -705,8 +705,8 @@ class Controller {
     async getPrices(view) {
         return await stockModel.getPrices(view);
     }
-    verifyPaymentInfo(view, card, expiry, cvv) {
-        return paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
+    async verifyPaymentInfo(view, card, expiry, cvv) {
+        return await paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
     }
     async chargePayment(view, amount, card, expiry, cvv) {
         return await paymentModel.chargePayment(view, amount, card, expiry, cvv);
@@ -725,10 +725,10 @@ const controller = new Controller();
 module.exports = controller;
 
 },{"fc155b4c4ede5435":"fbF5v","33f0685fa05a3bd4":"94Ex8"}],"fbF5v":[function(require,module,exports) {
-var _supabaseJs = require("@supabase/supabase-js");
+const supabase = require("26e3bcc752043e66");
 class StockModel {
     constructor(){
-        this.supabase = (0, _supabaseJs.createClient)("https://ohmidvwmuxmfxouxiekr.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obWlkdndtdXhtZnhvdXhpZWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODU0NzkxNjIsImV4cCI6MjAwMTA1NTE2Mn0.-usktHgBo9kmeDKTugyatBelOXlds5I4wFNhhiNRi_Y");
+        this.supabase = supabase.createClient("https://ohmidvwmuxmfxouxiekr.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obWlkdndtdXhtZnhvdXhpZWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODU0NzkxNjIsImV4cCI6MjAwMTA1NTE2Mn0.-usktHgBo9kmeDKTugyatBelOXlds5I4wFNhhiNRi_Y");
     }
     async getQuantities(view) {
         let { data , error  } = await this.supabase.from("Books").select("*");
@@ -765,7 +765,7 @@ module.exports = {
     stockModel
 };
 
-},{"@supabase/supabase-js":"04ZJL"}],"04ZJL":[function(require,module,exports) {
+},{"26e3bcc752043e66":"04ZJL"}],"04ZJL":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "FunctionsHttpError", ()=>(0, _functionsJs.FunctionsHttpError));
@@ -7761,28 +7761,41 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"94Ex8":[function(require,module,exports) {
-//dummy values
-let DATE = "3/3/23";
-let PAYMENT_STATUS = 2;
+const supabase = require("be6cd9da3477f2f0");
 class PaymentModel {
-    verifyPaymentInfo(view, card, expiry, cvv) {
-        if (PAYMENT_STATUS == 0) {
+    constructor(){
+        this.supabase = supabase.createClient("https://ohmidvwmuxmfxouxiekr.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obWlkdndtdXhtZnhvdXhpZWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODU0NzkxNjIsImV4cCI6MjAwMTA1NTE2Mn0.-usktHgBo9kmeDKTugyatBelOXlds5I4wFNhhiNRi_Y");
+    }
+    async getRow(expiry1) {
+        let { data , error  } = await this.supabase.from("Payment").select("*");
+        let id = parseInt(expiry1.charAt(0)) % 3;
+        let row = data[id];
+        return row;
+    }
+    async verifyPaymentInfo(view, card, expiry1, cvv) {
+        let row = await this.getRow(expiry1);
+        let paymentStatus = row.payment_status;
+        if (paymentStatus == 0) {
             view.updatePaymentStatus(0, "Payment method invalid!");
             return false;
         } else return true;
     }
-    async chargePayment(view, amount, card, expiry, cvv) {
+    async chargePayment(view, amount, card, expiry1, cvv) {
         view.updatePaymentStatus(2, "Payment successful!");
         return true;
     }
-    async verifyPaymentWithBank(view, amount, card, expiry, cvv) {
-        if (PAYMENT_STATUS == 1) {
+    async verifyPaymentWithBank(view, amount, card, expiry1, cvv) {
+        let row = await this.getRow(expiry1);
+        let paymentStatus = row.payment_status;
+        if (paymentStatus == 1) {
             view.updatePaymentStatus(1, "Payment invalidated by bank!");
             return false;
         } else return true;
     }
     async getDeliveryDate(view) {
-        view.updateDeliveryDate(DATE);
+        let row = await this.getRow(expiry);
+        let deliveryDate = row.delivery_date;
+        view.updateDeliveryDate(deliveryDate);
         return true;
     // return Promise.resolve(view.updateDeliveryDate(DATE));
     }
@@ -7793,7 +7806,7 @@ module.exports = {
     paymentModel
 };
 
-},{}],"2Idh1":[function(require,module,exports) {
+},{"be6cd9da3477f2f0":"04ZJL"}],"2Idh1":[function(require,module,exports) {
 const { OrderView , PaymentView  } = require("24f97c702c129b72");
 let BANK_VERIFICATION = true;
 let orderView = null;
