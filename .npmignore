@@ -1,0 +1,7 @@
+node_modules
+.parcel-cache
+dist
+__tests__
+.git.bfg-report
+exampleCode
+arch_diagrams

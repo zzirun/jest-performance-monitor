@@ -1,5 +1,5 @@
 {
-  "name": "local_impl",
+  "name": "jest-performance-monitor",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,7 +8,7 @@
     "runtimes": "parcel runtimeDisplay/index.html",
     "caseStudy": "parcel exampleCode/caseStudy/index.html"
   },
-  "author": "",
+  "author": "Zhai Zirun",
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.24.0",
@@ -24,5 +24,13 @@
     "percentile": "^1.6.0",
     "randomcolor": "^0.6.2",
     "ts-jest": "^29.0.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzirun/jest-perf-monitor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zzirun/jest-perf-monitor/issues"
+  },
+  "homepage": "https://github.com/zzirun/jest-perf-monitor#readme"
 }
