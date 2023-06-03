@@ -31,16 +31,16 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         return time;
     }
 
-    /*  Checks if id should be trigger or if too much time has elapsed 
-        and its most recent descendant should be trigger */
-    checkDescendantsForTrigger(pId, currId, realTime) {
-        let triggerId = pId;
-        // check if triggerId has had children before
-        if (this.visitedTriggerIds.has(triggerId)) {
-            // find most recent descendant of trigger id
-            let recentChildId = triggerId;
-            while (this.visitedTriggerIds.has(recentChildId)) {
-                let id = this.visitedTriggerIds.get(recentChildId);
+    /*  Checks if id should be parent or if too much time has elapsed 
+        and its most recent descendant should be parent */
+    checkDescendantsForParent(pId, currId, realTime) {
+        let parentId = pId;
+        // check if parentId has had children before
+        if (this.visitedParentIds.has(parentId)) {
+            // find most recent descendant of parent id
+            let recentChildId = parentId;
+            while (this.visitedParentIds.has(recentChildId)) {
+                let id = this.visitedParentIds.get(recentChildId);
                 if (currId != id) {
                     recentChildId = id;
                 } else {
@@ -52,19 +52,19 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
             /*  if it's been too long since the child id was called,
                 it's more likely that the current execution is 
                 scheduled after it instead of parallel to it. */
-            // take that child id as actual trigger if threshold of time elapsed is exceeded
+            // take that child id as actual parent if threshold of time elapsed is exceeded
             if (timeElapsed > this.assumeSerialThreshold) {
                 debug("Time elapsed since recent child exceeds threshold.", 
-                    "\nNew trigger id: ", recentChildId)
-                triggerId = recentChildId;
+                    "\nNew parent id: ", recentChildId)
+                parentId = recentChildId;
             }
         } 
-        return triggerId;
+        return parentId;
     }
 
-    getTriggerEndTime(triggerId, currId, realTime, sync) {
-        // Finding trigger end time
-        var triggerEndTime = 0;
+    getParentEndTime(triggerId, currId, realTime, sync) {
+        // Finding parent end time
+        var parentEndTime = 0;
         if (this.endingTimes.size > 0) {
             if (triggerId != currId) {
                 var i = 0;
@@ -73,37 +73,37 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
                     triggerId = triggers.get(triggerId);
                     i++;
                 }
-                triggerId = this.checkDescendantsForTrigger(triggerId, currId, realTime)
-                this.visitedTriggerIds.set(triggerId, currId);
-                triggerEndTime = this.endingTimes.get(triggerId) ?? 0;
+                parentId = this.checkDescendantsForParent(triggerId, currId, realTime)
+                this.visitedParentIds.set(parentId, currId);
+                parentEndTime = this.endingTimes.get(parentId) ?? 0;
             } else {
                 // if triggerId == currId, they are both == 0 (i.e. no stack above it)
                 // thus we can leave triggerEndTime as 0 if async exec
                 debug("Same trigger and curr id: ", triggerId, currId);
                 if (sync) {
-                    triggerEndTime = this.endingTimes.get(triggerId) ?? 0; 
+                    parentEndTime = this.endingTimes.get(triggerId) ?? 0; 
                 }
             }
         } 
-        return triggerEndTime;
+        return parentEndTime;
     }
 
-    getCurrEndTime(mock, model, realTime, triggerEndTime, name, sync) {
+    getCurrEndTime(mock, model, realTime, parentEndTime, name, sync) {
         //Calculating timings
         const run = mock.mock.calls.length;
         const args = mock.mock.calls[run - 1];
         const virtualTime = model(run, args);
 
-        debug('Trigger End Time: ', triggerEndTime,
+        debug('Parent End Time: ', parentEndTime,
             '\nTime generated: ', virtualTime,
             '\nReal time elapsed: ', realTime);
 
-        const virtualStartTime = triggerEndTime + realTime;
-        const currEndTime = triggerEndTime + virtualTime + realTime;
+        const virtualStartTime = parentEndTime + realTime;
+        const currEndTime = parentEndTime + virtualTime + realTime;
 
         // Updating timeline
-        if (sync && this.latestEndTime <= triggerEndTime || !sync) {
-            this.timeline.push({name: "real time", start: triggerEndTime, end: virtualStartTime});
+        if (sync && this.latestEndTime <= parentEndTime || !sync) {
+            this.timeline.push({name: "real time", start: parentEndTime, end: virtualStartTime});
         }
         this.timeline.push({name: name, start: virtualStartTime, end: currEndTime});
         this.latestEndTime = (currEndTime>this.latestEndTime) ? currEndTime : this.latestEndTime;
@@ -131,8 +131,8 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
 
         // Finding end time
         const realTime = this.getRealTime(currId);
-        const triggerEndTime = this.getTriggerEndTime(triggerId, currId, realTime, true);
-        const virtualEndTime = this.getCurrEndTime(mock, model, realTime, triggerEndTime, name, true);
+        const parentEndTime = this.getParentEndTime(triggerId, currId, realTime, true);
+        const virtualEndTime = this.getCurrEndTime(mock, model, realTime, parentEndTime, name, true);
         this.setMaxEndTime(triggerId, virtualEndTime);
         this.setMaxEndTime(currId, virtualEndTime);
 
@@ -153,8 +153,8 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
 
         // Finding end time
         const realTime = this.getRealTime(currId);
-        const triggerEndTime = this.getTriggerEndTime(triggerId, currId, realTime);
-        const virtualEndTime = this.getCurrEndTime(mock, model, realTime, triggerEndTime, name);
+        const parentEndTime = this.getParentEndTime(triggerId, currId, realTime);
+        const virtualEndTime = this.getCurrEndTime(mock, model, realTime, parentEndTime, name);
         this.setMaxEndTime(currId, virtualEndTime);
 
         debug('New End time for currid: ', virtualEndTime,
@@ -175,7 +175,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
         
         // Setup: Timing info
         this.endingTimes = new Map();
-        this.visitedTriggerIds = new Map();
+        this.visitedParentIds = new Map();
         this.realTimes = new Map();
         this.maxDependencyLength = 0;
 
