@@ -73,7 +73,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
                     triggerId = triggers.get(triggerId);
                     i++;
                 }
-                parentId = this.checkDescendantsForParent(triggerId, currId, realTime)
+                let parentId = this.checkDescendantsForParent(triggerId, currId, realTime)
                 this.visitedParentIds.set(parentId, currId);
                 parentEndTime = this.endingTimes.get(parentId) ?? 0;
             } else {
