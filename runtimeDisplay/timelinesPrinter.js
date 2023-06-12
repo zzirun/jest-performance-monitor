@@ -2,6 +2,9 @@ import Chart from "chart.js/auto";
 import randomColor from "randomcolor";
 let colours = new Map();
 colours.set("real time", "#b3b3b3");
+// colours.set("add", "#4281f5");
+// colours.set("get", "#09ab03");
+// colours.set("put", "#87291f");
 
 async function handleTimelines() {
     addClearButton();
@@ -157,7 +160,7 @@ function printTimeline (title, times, report, long, timeUnit) {
                 x: {
                     title: {
                         display: true,
-                        text: 'estimated duration (' + timeUnit + ')'
+                        text: 'time (' + timeUnit + ')'
                     },
                     type: 'linear',
                     position: 'bottom',

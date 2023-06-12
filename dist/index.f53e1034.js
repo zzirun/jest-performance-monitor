@@ -671,6 +671,7 @@ class PaymentView {
         return false;
     }
     async getDeliveryDate(email) {
+        console.log("hello");
         let displayed = controller.getDeliveryDate(this);
         let emailed = controller.emailDeliveryDate(email);
         return Promise.allSettled([
@@ -697,28 +698,68 @@ const { stockModel  } = require("fc155b4c4ede5435");
 const { paymentModel  } = require("33f0685fa05a3bd4");
 class Controller {
     async getQuantities(view) {
-        return await stockModel.getQuantities(view);
+        const timingStart = window.performance.now();
+        let res = await stockModel.getQuantities(view);
+        const timing = window.performance.now() - timingStart;
+        console.log("getQuantities: " + timing);
+        return res;
     }
     async changeQuantity(id, change) {
-        return await stockModel.changeQuantity(id, change);
+        const timingStart = window.performance.now();
+        let res = await stockModel.changeQuantity(id, change);
+        const timing = window.performance.now() - timingStart;
+        console.log("changeQuantity: " + timing);
+        return res;
+    // return await stockModel.changeQuantity(id, change);
     }
     async getPrices(view) {
-        return await stockModel.getPrices(view);
+        const timingStart = window.performance.now();
+        let res = await stockModel.getPrices(view);
+        const timing = window.performance.now() - timingStart;
+        console.log("getPrices: " + timing);
+        return res;
+    // return await stockModel.getPrices(view);
     }
     async verifyPaymentInfo(view, card, expiry, cvv) {
-        return await paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
+        const timingStart = window.performance.now();
+        let res = await paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
+        const timing = window.performance.now() - timingStart;
+        console.log("verifyPaymentInfo: " + timing);
+        return res;
+    // return await paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
     }
     async chargePayment(view, amount, card, expiry, cvv) {
-        return await paymentModel.chargePayment(view, amount, card, expiry, cvv);
+        const timingStart = window.performance.now();
+        let res = await paymentModel.chargePayment(view, amount, card, expiry, cvv);
+        const timing = window.performance.now() - timingStart;
+        console.log("chargePayment: " + timing);
+        return res;
+    // return await paymentModel.chargePayment(view, amount, card, expiry, cvv);
     }
     async verifyPaymentWithBank(view, amount, card, expiry, cvv) {
-        return await paymentModel.verifyPaymentWithBank(view, amount, card, expiry, cvv);
+        const timingStart = window.performance.now();
+        let res = await paymentModel.verifyPaymentWithBank(view, amount, card, expiry, cvv);
+        const timing = window.performance.now() - timingStart;
+        console.log("verifyPaymentWithBank: " + timing);
+        return res;
+    // return await paymentModel.verifyPaymentWithBank(view, amount, card, expiry, cvv);
     }
     async getDeliveryDate(view) {
-        return await paymentModel.getDeliveryDate(view);
+        const timingStart = window.performance.now();
+        console.log("helloo");
+        let res = await paymentModel.getDeliveryDate(view);
+        const timing = window.performance.now() - timingStart;
+        console.log("getDeliveryDate: " + timing);
+        return res;
+    // return await paymentModel.getDeliveryDate(view);
     }
     async emailDeliveryDate(email) {
-        return await paymentModel.emailDeliveryDate(email);
+        const timingStart = window.performance.now();
+        let res = await paymentModel.emailDeliveryDate(email);
+        const timing = window.performance.now() - timingStart;
+        console.log("emailDeliveryDate: " + timing);
+        return res;
+    // return await paymentModel.emailDeliveryDate(email);
     }
 }
 const controller = new Controller();
@@ -7766,26 +7807,26 @@ class PaymentModel {
     constructor(){
         this.supabase = supabase.createClient("https://ohmidvwmuxmfxouxiekr.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obWlkdndtdXhtZnhvdXhpZWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODU0NzkxNjIsImV4cCI6MjAwMTA1NTE2Mn0.-usktHgBo9kmeDKTugyatBelOXlds5I4wFNhhiNRi_Y");
     }
-    async getRow(expiry1) {
+    async getRow(expiry) {
         let { data , error  } = await this.supabase.from("Payment").select("*");
-        let id = parseInt(expiry1.charAt(0)) % 3;
+        let id = parseInt(expiry.charAt(0)) % 3;
         let row = data[id];
         return row;
     }
-    async verifyPaymentInfo(view, card, expiry1, cvv) {
-        let row = await this.getRow(expiry1);
+    async verifyPaymentInfo(view, card, expiry, cvv) {
+        let row = await this.getRow(expiry);
         let paymentStatus = row.payment_status;
         if (paymentStatus == 0) {
             view.updatePaymentStatus(0, "Payment method invalid!");
             return false;
         } else return true;
     }
-    async chargePayment(view, amount, card, expiry1, cvv) {
+    async chargePayment(view, amount, card, expiry, cvv) {
         view.updatePaymentStatus(2, "Payment successful!");
         return true;
     }
-    async verifyPaymentWithBank(view, amount, card, expiry1, cvv) {
-        let row = await this.getRow(expiry1);
+    async verifyPaymentWithBank(view, amount, card, expiry, cvv) {
+        let row = await this.getRow(expiry);
         let paymentStatus = row.payment_status;
         if (paymentStatus == 1) {
             view.updatePaymentStatus(1, "Payment invalidated by bank!");
@@ -7793,8 +7834,10 @@ class PaymentModel {
         } else return true;
     }
     async getDeliveryDate(view) {
-        let row = await this.getRow(expiry);
+        console.log("heyy");
+        let row = await this.getRow("2345");
         let deliveryDate = row.delivery_date;
+        console.log(row);
         view.updateDeliveryDate(deliveryDate);
         return true;
     // return Promise.resolve(view.updateDeliveryDate(DATE));
@@ -7883,6 +7926,7 @@ class DocumentEditor {
         this.addOrderHeaders();
     }
     addQtyToOrderTable(id, info) {
+        const timingStart = window.performance.now();
         let row = document.createElement("tr");
         this.rows.set(id, row);
         let idCell = document.createElement("td");
@@ -7895,12 +7939,17 @@ class DocumentEditor {
         qtyCell.innerText = info.qty;
         row.appendChild(qtyCell);
         this.orderTable.appendChild(row);
+        const timing = window.performance.now() - timingStart;
+        console.log("addQtyToOrderTable: " + timing);
     }
     addPriceToOrderTable(id, price) {
+        const timingStart = window.performance.now();
         let row = this.rows.get(id);
         let priceCell = document.createElement("td");
         priceCell.innerText = price;
         row.appendChild(priceCell);
+        const timing = window.performance.now() - timingStart;
+        console.log("addPriceToOrderTable: " + timing);
     }
     addTotalPrice(totalPrice) {
         this.totalPrice = totalPrice;
@@ -7941,19 +7990,25 @@ class DocumentEditor {
         payment.appendChild(this.paymentView);
     }
     addPaymentStatus(message) {
+        const timingStart = window.performance.now();
         let confirmation = document.createElement("div");
         confirmation.innerText = message;
         this.paymentView.appendChild(confirmation);
+        const timing = window.performance.now() - timingStart;
+        console.log("addPaymentStatus: " + timing);
     }
     addDeliveryDate(date) {
+        const timingStart = window.performance.now();
         let delivery = document.createElement("div");
         delivery.innerText = "Delivery date: " + date;
         this.paymentView.appendChild(delivery);
+        const timing = window.performance.now() - timingStart;
+        console.log("addDeliveryDate: " + timing);
     }
 }
 const documentEditor = new DocumentEditor();
 module.exports = documentEditor;
 
-},{"24f97c702c129b72":"llPCs"}]},["f9f5V","fpUvQ"], "fpUvQ", "parcelRequiredc4d")
+},{"24f97c702c129b72":"llPCs"}]},["f9f5V","fpUvQ"], "fpUvQ", "parcelRequire19c6")
 
 //# sourceMappingURL=index.f53e1034.js.map

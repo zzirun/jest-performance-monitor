@@ -120,6 +120,7 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
     }
 
     notify(mock, model, name) {
+        console.log("hello")
         debug('\nMock name: ', name);
         this.maxDependencyLength++;
 

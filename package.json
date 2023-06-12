@@ -19,7 +19,6 @@
     "fs": "^0.0.1-security",
     "jest": "^29.4.2",
     "jest-environment-jsdom": "^29.5.0",
-    "mathjs": "^11.8.0",
     "parcel": "^2.8.3",
     "percentile": "^1.6.0",
     "randomcolor": "^0.6.2",
@@ -32,5 +31,8 @@
   "bugs": {
     "url": "https://github.com/zzirun/jest-perf-monitor/issues"
   },
-  "homepage": "https://github.com/zzirun/jest-perf-monitor#readme"
+  "homepage": "https://github.com/zzirun/jest-perf-monitor#readme",
+  "devDependencies": {
+    "process": "^0.11.10"
+  }
 }

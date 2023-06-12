@@ -43,15 +43,13 @@ class PaymentModel {
     }
 
     async getDeliveryDate(view) {
-        let row = await this.getRow(expiry);
+        console.log("heyy")
+        let row = await this.getRow("2345");
         let deliveryDate = row.delivery_date;
+        console.log(row)
         view.updateDeliveryDate(deliveryDate);
         return true;
         // return Promise.resolve(view.updateDeliveryDate(DATE));
-    }
-
-    async emailDeliveryDate(email) {
-
     }
 }
 

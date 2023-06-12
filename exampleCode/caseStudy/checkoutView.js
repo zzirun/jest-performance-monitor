@@ -68,17 +68,17 @@ class PaymentView {
         documentEditor.createPaymentDiv(this);
     }
 
-    async processPayment(amount, card, expiry, cvv, email, bankVerification) {
+    async processPayment(amount, card, expiry, cvv, bankVerification) {
         console.log(cvv)
         let validPaymentInfo = await this.checkPaymentInfo(card, expiry, cvv);
         if (validPaymentInfo) {
             if (bankVerification) {
                 let successfulPayment = await this.chargePaymentWithBankVerification(amount, card, expiry, cvv);
                 if (successfulPayment) {
-                    await this.getDeliveryDate(email);
+                    await this.getDeliveryDate();
                 }
             } else {
-                let delivery = this.getDeliveryDate(email);
+                let delivery = this.getDeliveryDate();
                 let payment = this.chargePayment(amount, card, expiry, cvv);
                 await Promise.allSettled([payment, delivery]);
             }
@@ -127,10 +127,10 @@ class PaymentView {
         return false;
     }
 
-    async getDeliveryDate(email) {
+    async getDeliveryDate() {
+        console.log("hello")
         let displayed = controller.getDeliveryDate(this);
-        let emailed = controller.emailDeliveryDate(email);
-        return Promise.allSettled([displayed, emailed]);
+        return Promise.allSettled([displayed]);
     }
 
     updatePaymentStatus(status, message) {

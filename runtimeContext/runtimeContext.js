@@ -44,6 +44,10 @@ class RuntimeContext {
         return this;
     }
 
+    writeResultsToFile(path) {
+        timelinesProcessor.writeResultsToFile(path);
+    }
+
     clearContext() {
         this.monitor.resetMonitor();
     }

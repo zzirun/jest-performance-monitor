@@ -1,5 +1,5 @@
 const axios = require("axios");
-const {add, sqrt} = require("mathjs")
+const {add} = require("./idProcessor.js");
 
 class Registrar {
 
@@ -14,19 +14,17 @@ class Registrar {
   async serialModifyIds(p) {
     const get1 = await axios.get(`https://swapi.dev/api/people/${1}/`);
     var modifiedIds = add(p, [get1.data.id]);
-    var modifiedIds = sqrt(modifiedIds);
+    var modifiedIds = add(p, [get1.data.id]);
     await axios.put(`https://swapi.dev/api/people/`, {id: modifiedIds, name: test});
     const get2 = await axios.get(`https://swapi.dev/api/people/${1}/`);
     var modifiedIds = add(p, [get2.data.id]);
-    var modifiedIds = sqrt(modifiedIds);
     await axios.put(`https://swapi.dev/api/people/`, {id: modifiedIds, name: test});
   }
 
   async modifyIds(p) {
     const get1 = await axios.get(`https://swapi.dev/api/people/${1}/`);
     const get2 = axios.get(`https://swapi.dev/api/people/${2}/`);
-    var modifiedIds = add(p, [get1.data.id]);
-    var modifiedIds = sqrt(modifiedIds);
+    var modifiedIds = add(p, [1]);
     await axios.put(`https://swapi.dev/api/people/`, {id: modifiedIds, name: test});
   }
 
@@ -72,6 +70,7 @@ class Registrar {
   async doubleGetId(id) {
     let res = await axios.get(`https://swapi.dev/api/people/${id}/`);
     let res2 = await axios.get(`https://swapi.dev/api/people/${id}/`);
+    return res2;
   }
 
   async mixedIdCalls() {
@@ -81,7 +80,10 @@ class Registrar {
   }
 
   async mixedIdCalls2() {
-    await this.doubleGetId(2, 1); // 2 serial gets
+    await this.getId(1);
+    let newId = add(1, 1);
+    await this.registerId(newId);
+    // await this.doubleGetId(2, 1); // 2 serial gets
     // await this.changeId(1, 2); // get and put
     // await this.putAndGetId(2, 1); // put and get
     // await this.getId(1);    

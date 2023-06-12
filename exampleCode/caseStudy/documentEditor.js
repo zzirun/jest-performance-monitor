@@ -97,6 +97,8 @@ class DocumentEditor {
     }
 
     addQtyToOrderTable(id, info) {
+        const timingStart = window.performance.now();
+        
         let row = document.createElement("tr");
         this.rows.set(id, row);
 
@@ -113,13 +115,21 @@ class DocumentEditor {
         row.appendChild(qtyCell);
 
         this.orderTable.appendChild(row);
+
+        const timing = window.performance.now() - timingStart;
+        console.log("addQtyToOrderTable: " + timing);
     }
 
     addPriceToOrderTable(id, price) {
+        const timingStart = window.performance.now();
+
         let row = this.rows.get(id);
         let priceCell = document.createElement("td");
         priceCell.innerText = price;
         row.appendChild(priceCell);
+
+        const timing = window.performance.now() - timingStart;
+        console.log("addPriceToOrderTable: " + timing);
     }
 
     addTotalPrice(totalPrice) {
@@ -170,15 +180,21 @@ class DocumentEditor {
     }
 
     addPaymentStatus(message) {
+        const timingStart = window.performance.now();
         let confirmation = document.createElement("div");
         confirmation.innerText = message;
         this.paymentView.appendChild(confirmation);
+        const timing = window.performance.now() - timingStart;
+        console.log("addPaymentStatus: " + timing);
     }
 
     addDeliveryDate(date) {
+        const timingStart = window.performance.now();
         let delivery = document.createElement("div");
         delivery.innerText = "Delivery date: " + date;
         this.paymentView.appendChild(delivery);
+        const timing = window.performance.now() - timingStart;
+        console.log("addDeliveryDate: " + timing);
     }
 
 }
