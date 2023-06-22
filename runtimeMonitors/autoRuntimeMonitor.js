@@ -47,17 +47,20 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
                     break;
                 }
             }
+
             // find real time elapsed since that child id 
             let timeElapsed = realTime - this.realTimes.get(recentChildId);
+
             /*  if it's been too long since the child id was called,
                 it's more likely that the current execution is 
                 scheduled after it instead of parallel to it. */
             // take that child id as actual parent if threshold of time elapsed is exceeded
             if (timeElapsed > this.assumeSerialThreshold) {
                 debug("Time elapsed since recent child exceeds threshold.", 
+                    "\nOld parent id: ", parentId,
                     "\nNew parent id: ", recentChildId)
                 parentId = recentChildId;
-            }
+            } 
         } 
         return parentId;
     }
@@ -120,7 +123,6 @@ class AutoRuntimeMonitor extends RuntimeMonitor{
     }
 
     notify(mock, model, name) {
-        console.log("hello")
         debug('\nMock name: ', name);
         this.maxDependencyLength++;
 

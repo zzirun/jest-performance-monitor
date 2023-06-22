@@ -1,4 +1,5 @@
-const {OrderView, PaymentView} = require("../caseStudy/checkoutView.js");
+/* Commented out code is to log time taken for code to run 
+    for evaluation purposes */
 
 let BANK_VERIFICATION = true;
 
@@ -12,8 +13,7 @@ function submitPayment(event) {
     let card = document.getElementById("card").value;
     let exp = document.getElementById("exp").value;
     let cvv = document.getElementById("cvv").value;
-    console.log(cvv)
-    paymentView.processPayment(this.totalPrice, card, exp, cvv, "", BANK_VERIFICATION);
+    paymentView.processPayment(this.totalPrice, card, exp, cvv, BANK_VERIFICATION);
 }
 
 async function submitQtyChange(event) {
@@ -22,7 +22,7 @@ async function submitQtyChange(event) {
     let change = document.getElementById("change").value;
     console.log("Changing... " + id + change);
     await orderView.changeQuantity(id, change);
-    // documentEditor.clearOrderTable();
+    orderView.pricesAdded = false;
     await orderView.renderQuantities();
     orderView.renderPrices();
     orderView.renderTotalPrice();
@@ -97,7 +97,7 @@ class DocumentEditor {
     }
 
     addQtyToOrderTable(id, info) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         
         let row = document.createElement("tr");
         this.rows.set(id, row);
@@ -116,20 +116,20 @@ class DocumentEditor {
 
         this.orderTable.appendChild(row);
 
-        const timing = window.performance.now() - timingStart;
-        console.log("addQtyToOrderTable: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("addQtyToOrderTable: " + timing);
     }
 
     addPriceToOrderTable(id, price) {
-        const timingStart = window.performance.now();
-
+        // const timingStart = window.performance.now();
+        
         let row = this.rows.get(id);
         let priceCell = document.createElement("td");
         priceCell.innerText = price;
         row.appendChild(priceCell);
 
-        const timing = window.performance.now() - timingStart;
-        console.log("addPriceToOrderTable: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("addPriceToOrderTable: " + timing);
     }
 
     addTotalPrice(totalPrice) {
@@ -180,21 +180,21 @@ class DocumentEditor {
     }
 
     addPaymentStatus(message) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let confirmation = document.createElement("div");
         confirmation.innerText = message;
         this.paymentView.appendChild(confirmation);
-        const timing = window.performance.now() - timingStart;
-        console.log("addPaymentStatus: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("addPaymentStatus: " + timing);
     }
 
     addDeliveryDate(date) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let delivery = document.createElement("div");
         delivery.innerText = "Delivery date: " + date;
         this.paymentView.appendChild(delivery);
-        const timing = window.performance.now() - timingStart;
-        console.log("addDeliveryDate: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("addDeliveryDate: " + timing);
     }
 
 }

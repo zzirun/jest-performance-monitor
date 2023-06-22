@@ -2,9 +2,6 @@ import Chart from "chart.js/auto";
 import randomColor from "randomcolor";
 let colours = new Map();
 colours.set("real time", "#b3b3b3");
-// colours.set("add", "#4281f5");
-// colours.set("get", "#09ab03");
-// colours.set("put", "#87291f");
 
 async function handleTimelines() {
     addClearButton();
@@ -151,7 +148,7 @@ function printTimeline (title, times, report, long, timeUnit) {
                             if (context.dataIndex > 0) {
                                 name = 'End: ';
                             }
-                            return name + context.label + 'ms';
+                            return name + context.label + timeUnit;
                         }
                     }
                 }
@@ -187,12 +184,11 @@ function printLegend() {
     legendContainer.innerHTML = '<b>Legend:</b>'
     legendContainer.style.display = 'flex';
     legendContainer.style.flexDirection = 'row';
-    // legendContainer.style.setAttribute("flex-wrap", "wrap");
     legendContainer.style.margin = 0;
     legendContainer.style.padding = 0;
 
     for (let [name, colour] of colours.entries()) {
-        // Containe
+        // Container
         const li = document.createElement('li');
         li.style.alignItems = 'center';
         li.style.cursor = 'pointer';

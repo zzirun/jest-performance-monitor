@@ -14,6 +14,15 @@ class OrderView {
         return controller.getQuantities(this);
     }
 
+    async changeQuantities(changes) {
+        await this.changeQuantity("test", 0);
+        let toAwait = []
+        for (let i of changes) {
+            toAwait.push(this.changeQuantity(i.id, i.change));
+        }
+        await Promise.allSettled(toAwait);
+    }
+
     async changeQuantity(id, change) {
         return controller.changeQuantity(id, change);
     }
@@ -41,24 +50,28 @@ class OrderView {
     updateQuantities(quantities) {
         this.quantities = quantities;
         documentEditor.clearOrderTable();
-        console.log("Updating quantities");
+        let pricesAddedHere = false;
         for (let [id, info] of quantities) {
             documentEditor.addQtyToOrderTable(id, info);
             if (this.prices.has(id) && !this.pricesAdded) {
+                console.log("Adding prices")
+                pricesAddedHere = true;
                 documentEditor.addPriceToOrderTable(id, this.prices.get(id));
             }
         }
+        this.pricesAdded = this.pricesAdded || pricesAddedHere;
     }
 
     updatePrices(prices) {
         this.prices = prices;
-        console.log("Updating prices");
+        let pricesAddedHere = false;
         for (let [id, price] of prices) {
-            if (this.quantities.has(id)) {
-                this.pricesAdded = true;
+            if (this.quantities.has(id) && !this.pricesAdded) {
+                pricesAddedHere = true;
                 documentEditor.addPriceToOrderTable(id, price);
             }
         }
+        this.pricesAdded = this.pricesAdded || pricesAddedHere;
     }
 
 }
@@ -69,7 +82,6 @@ class PaymentView {
     }
 
     async processPayment(amount, card, expiry, cvv, bankVerification) {
-        console.log(cvv)
         let validPaymentInfo = await this.checkPaymentInfo(card, expiry, cvv);
         if (validPaymentInfo) {
             if (bankVerification) {
@@ -86,7 +98,6 @@ class PaymentView {
     }
 
     async checkPaymentInfo(card, expiry, cvv) {
-        console.log(cvv)
         let syntaxCorrect = this.syntaxCheck(card, expiry, cvv);
         if (syntaxCorrect) {
             let encryptedCard = this.encryptCardInfo();
@@ -98,7 +109,6 @@ class PaymentView {
     }
 
     syntaxCheck(card, expiry, cvv) {
-        console.log(cvv.length)
         let cardLen = card.length == 16;
         let expiryLen = expiry.length == 4;
         let cvvLen = cvv.length == 3;
@@ -128,7 +138,6 @@ class PaymentView {
     }
 
     async getDeliveryDate() {
-        console.log("hello")
         let displayed = controller.getDeliveryDate(this);
         return Promise.allSettled([displayed]);
     }

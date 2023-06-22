@@ -575,6 +575,12 @@ class OrderView {
     async renderQuantities() {
         return controller.getQuantities(this);
     }
+    async changeQuantities(changes) {
+        await this.changeQuantity("test", 0);
+        let toAwait = [];
+        for (let i of changes)toAwait.push(this.changeQuantity(i.id, i.change));
+        await Promise.allSettled(toAwait);
+    }
     async changeQuantity(id, change) {
         return controller.changeQuantity(id, change);
     }
@@ -601,34 +607,39 @@ class OrderView {
     updateQuantities(quantities) {
         this.quantities = quantities;
         documentEditor.clearOrderTable();
-        console.log("Updating quantities");
+        let pricesAddedHere = false;
         for (let [id, info] of quantities){
             documentEditor.addQtyToOrderTable(id, info);
-            if (this.prices.has(id) && !this.pricesAdded) documentEditor.addPriceToOrderTable(id, this.prices.get(id));
+            if (this.prices.has(id) && !this.pricesAdded) {
+                console.log("Adding prices");
+                pricesAddedHere = true;
+                documentEditor.addPriceToOrderTable(id, this.prices.get(id));
+            }
         }
+        this.pricesAdded = this.pricesAdded || pricesAddedHere;
     }
     updatePrices(prices) {
         this.prices = prices;
-        console.log("Updating prices");
-        for (let [id, price] of prices)if (this.quantities.has(id)) {
-            this.pricesAdded = true;
+        let pricesAddedHere = false;
+        for (let [id, price] of prices)if (this.quantities.has(id) && !this.pricesAdded) {
+            pricesAddedHere = true;
             documentEditor.addPriceToOrderTable(id, price);
         }
+        this.pricesAdded = this.pricesAdded || pricesAddedHere;
     }
 }
 class PaymentView {
     constructor(){
         documentEditor.createPaymentDiv(this);
     }
-    async processPayment(amount, card, expiry, cvv, email, bankVerification) {
-        console.log(cvv);
+    async processPayment(amount, card, expiry, cvv, bankVerification) {
         let validPaymentInfo = await this.checkPaymentInfo(card, expiry, cvv);
         if (validPaymentInfo) {
             if (bankVerification) {
                 let successfulPayment = await this.chargePaymentWithBankVerification(amount, card, expiry, cvv);
-                if (successfulPayment) await this.getDeliveryDate(email);
+                if (successfulPayment) await this.getDeliveryDate();
             } else {
-                let delivery = this.getDeliveryDate(email);
+                let delivery = this.getDeliveryDate();
                 let payment = this.chargePayment(amount, card, expiry, cvv);
                 await Promise.allSettled([
                     payment,
@@ -638,7 +649,6 @@ class PaymentView {
         }
     }
     async checkPaymentInfo(card, expiry, cvv) {
-        console.log(cvv);
         let syntaxCorrect = this.syntaxCheck(card, expiry, cvv);
         if (syntaxCorrect) {
             let encryptedCard = this.encryptCardInfo();
@@ -649,7 +659,6 @@ class PaymentView {
         }
     }
     syntaxCheck(card, expiry, cvv) {
-        console.log(cvv.length);
         let cardLen = card.length == 16;
         let expiryLen = expiry.length == 4;
         let cvvLen = cvv.length == 3;
@@ -670,13 +679,10 @@ class PaymentView {
         if (firstVerification && secondVerification) return await controller.chargePayment(this, amount, card, expiry, cvv);
         return false;
     }
-    async getDeliveryDate(email) {
-        console.log("hello");
+    async getDeliveryDate() {
         let displayed = controller.getDeliveryDate(this);
-        let emailed = controller.emailDeliveryDate(email);
         return Promise.allSettled([
-            displayed,
-            emailed
+            displayed
         ]);
     }
     updatePaymentStatus(status, message) {
@@ -697,69 +703,55 @@ module.exports = {
 const { stockModel  } = require("fc155b4c4ede5435");
 const { paymentModel  } = require("33f0685fa05a3bd4");
 class Controller {
-    async getQuantities(view) {
-        const timingStart = window.performance.now();
+    /* Commented out code is to log time taken for code to run 
+        for evaluation purposes */ async getQuantities(view) {
+        // const timingStart = window.performance.now();
         let res = await stockModel.getQuantities(view);
-        const timing = window.performance.now() - timingStart;
-        console.log("getQuantities: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("getQuantities: " + timing);
         return res;
     }
     async changeQuantity(id, change) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let res = await stockModel.changeQuantity(id, change);
-        const timing = window.performance.now() - timingStart;
-        console.log("changeQuantity: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("changeQuantity: " + timing);
         return res;
-    // return await stockModel.changeQuantity(id, change);
     }
     async getPrices(view) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let res = await stockModel.getPrices(view);
-        const timing = window.performance.now() - timingStart;
-        console.log("getPrices: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("getPrices: " + timing);
         return res;
-    // return await stockModel.getPrices(view);
     }
     async verifyPaymentInfo(view, card, expiry, cvv) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let res = await paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
-        const timing = window.performance.now() - timingStart;
-        console.log("verifyPaymentInfo: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("verifyPaymentInfo: " + timing);
         return res;
-    // return await paymentModel.verifyPaymentInfo(view, card, expiry, cvv);
     }
     async chargePayment(view, amount, card, expiry, cvv) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let res = await paymentModel.chargePayment(view, amount, card, expiry, cvv);
-        const timing = window.performance.now() - timingStart;
-        console.log("chargePayment: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("chargePayment: " + timing);
         return res;
-    // return await paymentModel.chargePayment(view, amount, card, expiry, cvv);
     }
     async verifyPaymentWithBank(view, amount, card, expiry, cvv) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let res = await paymentModel.verifyPaymentWithBank(view, amount, card, expiry, cvv);
-        const timing = window.performance.now() - timingStart;
-        console.log("verifyPaymentWithBank: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("verifyPaymentWithBank: " + timing);
         return res;
-    // return await paymentModel.verifyPaymentWithBank(view, amount, card, expiry, cvv);
     }
     async getDeliveryDate(view) {
-        const timingStart = window.performance.now();
-        console.log("helloo");
+        // const timingStart = window.performance.now();
         let res = await paymentModel.getDeliveryDate(view);
-        const timing = window.performance.now() - timingStart;
-        console.log("getDeliveryDate: " + timing);
+        // const timing = window.performance.now() - timingStart;
+        // console.log("getDeliveryDate: " + timing);
         return res;
-    // return await paymentModel.getDeliveryDate(view);
-    }
-    async emailDeliveryDate(email) {
-        const timingStart = window.performance.now();
-        let res = await paymentModel.emailDeliveryDate(email);
-        const timing = window.performance.now() - timingStart;
-        console.log("emailDeliveryDate: " + timing);
-        return res;
-    // return await paymentModel.emailDeliveryDate(email);
     }
 }
 const controller = new Controller();
@@ -7842,7 +7834,6 @@ class PaymentModel {
         return true;
     // return Promise.resolve(view.updateDeliveryDate(DATE));
     }
-    async emailDeliveryDate(email) {}
 }
 const paymentModel = new PaymentModel();
 module.exports = {
@@ -7850,8 +7841,8 @@ module.exports = {
 };
 
 },{"be6cd9da3477f2f0":"04ZJL"}],"2Idh1":[function(require,module,exports) {
-const { OrderView , PaymentView  } = require("24f97c702c129b72");
-let BANK_VERIFICATION = true;
+/* Commented out code is to log time taken for code to run 
+    for evaluation purposes */ let BANK_VERIFICATION = true;
 let orderView = null;
 let paymentView = null;
 function submitPayment(event) {
@@ -7860,8 +7851,7 @@ function submitPayment(event) {
     let card = document.getElementById("card").value;
     let exp = document.getElementById("exp").value;
     let cvv = document.getElementById("cvv").value;
-    console.log(cvv);
-    paymentView.processPayment(this.totalPrice, card, exp, cvv, "", BANK_VERIFICATION);
+    paymentView.processPayment(this.totalPrice, card, exp, cvv, BANK_VERIFICATION);
 }
 async function submitQtyChange(event) {
     event.preventDefault();
@@ -7869,7 +7859,7 @@ async function submitQtyChange(event) {
     let change = document.getElementById("change").value;
     console.log("Changing... " + id + change);
     await orderView.changeQuantity(id, change);
-    // documentEditor.clearOrderTable();
+    orderView.pricesAdded = false;
     await orderView.renderQuantities();
     orderView.renderPrices();
     orderView.renderTotalPrice();
@@ -7926,7 +7916,7 @@ class DocumentEditor {
         this.addOrderHeaders();
     }
     addQtyToOrderTable(id, info) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let row = document.createElement("tr");
         this.rows.set(id, row);
         let idCell = document.createElement("td");
@@ -7939,17 +7929,17 @@ class DocumentEditor {
         qtyCell.innerText = info.qty;
         row.appendChild(qtyCell);
         this.orderTable.appendChild(row);
-        const timing = window.performance.now() - timingStart;
-        console.log("addQtyToOrderTable: " + timing);
+    // const timing = window.performance.now() - timingStart;
+    // console.log("addQtyToOrderTable: " + timing);
     }
     addPriceToOrderTable(id, price) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let row = this.rows.get(id);
         let priceCell = document.createElement("td");
         priceCell.innerText = price;
         row.appendChild(priceCell);
-        const timing = window.performance.now() - timingStart;
-        console.log("addPriceToOrderTable: " + timing);
+    // const timing = window.performance.now() - timingStart;
+    // console.log("addPriceToOrderTable: " + timing);
     }
     addTotalPrice(totalPrice) {
         this.totalPrice = totalPrice;
@@ -7990,25 +7980,25 @@ class DocumentEditor {
         payment.appendChild(this.paymentView);
     }
     addPaymentStatus(message) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let confirmation = document.createElement("div");
         confirmation.innerText = message;
         this.paymentView.appendChild(confirmation);
-        const timing = window.performance.now() - timingStart;
-        console.log("addPaymentStatus: " + timing);
+    // const timing = window.performance.now() - timingStart;
+    // console.log("addPaymentStatus: " + timing);
     }
     addDeliveryDate(date) {
-        const timingStart = window.performance.now();
+        // const timingStart = window.performance.now();
         let delivery = document.createElement("div");
         delivery.innerText = "Delivery date: " + date;
         this.paymentView.appendChild(delivery);
-        const timing = window.performance.now() - timingStart;
-        console.log("addDeliveryDate: " + timing);
+    // const timing = window.performance.now() - timingStart;
+    // console.log("addDeliveryDate: " + timing);
     }
 }
 const documentEditor = new DocumentEditor();
 module.exports = documentEditor;
 
-},{"24f97c702c129b72":"llPCs"}]},["f9f5V","fpUvQ"], "fpUvQ", "parcelRequire19c6")
+},{}]},["f9f5V","fpUvQ"], "fpUvQ", "parcelRequire19c6")
 
 //# sourceMappingURL=index.f53e1034.js.map
