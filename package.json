@@ -1,8 +1,8 @@
 {
   "name": "jest-performance-monitor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "quip.js",
   "scripts": {
     "test": "jest",
     "runtimes": "parcel runtimeDisplay/index.html",
